@@ -88,7 +88,7 @@ class ZumaDeluxe(World):
 
     # Universal Tracker
 
-    #@property
+    @property
     def is_universal_tracker(self) -> bool:
         return hasattr(self.multiworld, "re_gen_passthrough")
 

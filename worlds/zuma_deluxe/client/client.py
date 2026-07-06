@@ -310,6 +310,5 @@ def launch_zuma_deluxe_ap_client(*args) -> None:
 
     colorama.deinit()
 
-
 if __name__ == "__main__":
     launch_zuma_deluxe_ap_client(*sys.argv[1:])

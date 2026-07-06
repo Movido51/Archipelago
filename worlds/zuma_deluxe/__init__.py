@@ -7,7 +7,6 @@ def launch_client_zd(*args:str) -> None:
     from .client.client import launch_zuma_deluxe_ap_client
     launch(launch_zuma_deluxe_ap_client, name = "ZumaDeluxeClient", args = args)
 
-
 components.append(
     Component(
         "Zuma Deluxe Client",

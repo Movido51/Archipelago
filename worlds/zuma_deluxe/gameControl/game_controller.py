@@ -2,11 +2,9 @@ from typing import Dict, List, Optional, Set, Tuple, Union
 
 import collections
 import logging
-import math
 
 import enum
 
-from test.netutils.test_location_store import full_state
 from .enums import (
     ZumaDeluxeGameState,
     ZumaDeluxeInLevel,
@@ -17,7 +15,7 @@ from .enums import (
     ZumaDeluxeMode
 )
 
-from ..items_data import extra_items,FillerDict, Group
+from ..items_data import extra_items, Group
 
 from .game_state_manager import GameStateManager, GameState
 
@@ -146,6 +144,7 @@ class GameController:
 
     filler_items_checks: Dict[str,float]
     checked_clear: bool
+    deathlink_received: bool
 
 
     def __init__(self, logger: logging.Logger = None) -> None:
@@ -226,7 +225,7 @@ class GameController:
         self.filler_items_checks = {}
         for item in extra_items:
             self.filler_items_checks[item["name"]] = 0.0
-
+        self.deathlink_received = False
 
 
     def log(self, message)->None:
@@ -580,6 +579,15 @@ class GameController:
 
 
     def deathlinker(self):
+
+        
+        if self.game_state_in_level != ZumaDeluxeInLevel.LEVEL:
+            return
+
+        if self.deathlink_received:
+            self.deathlink_received = False
+            self.game_state_manager.set_level_speed(10000)
+
         pass
 
     def check_for_completed_locations(self):
@@ -959,3 +967,4 @@ class GameController:
         self.game_last_section = self.game_actual_section
         self.game_last_difficulty = self.game_difficulty
         self.game_area_max_combo = 0
+        self.game_state_manager.set_lives(self.check_progressive_lives())
