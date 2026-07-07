@@ -56,12 +56,12 @@ def create_all_regions(world: ZumaDeluxe) -> None:
     rule_to_end: Optional[Rule] = None
     #gauntlet
     if world.selected_goal_level_gauntlet is not None:
-        rule_to_end = Has(f"Board Unlock: {world.selected_goal_level_gauntlet.value.split("- ", 1)[1]}")
+        rule_to_end = Has(f"Board Unlock: {world.selected_goal_level_gauntlet.value.split('- ', 1)[1]}")
     if world.selected_goal_level_adventure is not None:
         if rule_to_end is not None:
-            rule_to_end = Or(rule_to_end,Has(f"Stage Unlock: {world.selected_goal_level_adventure.value.split("- ", 1)[1]}"))
+            rule_to_end = Or(rule_to_end,Has(f"Stage Unlock: {world.selected_goal_level_adventure.value.split('- ', 1)[1]}"))
         else:
-            rule_to_end = Has(f"Stage Unlock: {world.selected_goal_level_adventure.value.split("- ", 1)[1]}")
+            rule_to_end = Has(f"Stage Unlock: {world.selected_goal_level_adventure.value.split('- ', 1)[1]}")
 
 
     if rule_to_end is not None:
