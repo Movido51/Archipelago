@@ -145,6 +145,10 @@ class GameController:
     filler_items_checks: Dict[str,float]
     checked_clear: bool
     deathlink_received: bool
+    death_has_come:bool
+    send_death:bool
+    last_live: int
+    lost_a_live: bool
 
 
     def __init__(self, logger: logging.Logger = None) -> None:
@@ -226,6 +230,10 @@ class GameController:
         for item in extra_items:
             self.filler_items_checks[item["name"]] = 0.0
         self.deathlink_received = False
+        self.death_has_come = False
+        self.send_death = False
+        self.last_live = -1
+        self.lost_a_live = False
 
 
     def log(self, message)->None:
@@ -251,7 +259,7 @@ class GameController:
 
                 self._refresh_game_state()
                 self.back_setup()
-                self.deathlinker()
+                self.death_linker()
                 self.score_control()
                 self.check_for_completed_locations()
                 self.process_received_items()
@@ -299,6 +307,14 @@ class GameController:
 
         self.moved_up = False
         self.check_goal_level_clear = 0
+
+        if game_state.actual_live == -1:
+            self.last_live = game_state.actual_live
+        if self.last_live > game_state.actual_live:
+            self.lost_a_live = True
+        else:
+            self.lost_a_live = False
+        self.last_live = game_state.actual_live
 
 
 
@@ -578,17 +594,35 @@ class GameController:
         return self.have_item_su_type("Chains")
 
 
-    def deathlinker(self):
+    def death_linker(self):
 
-        
+
         if self.game_state_in_level != ZumaDeluxeInLevel.LEVEL:
             return
-
+        if SectionState.Unlocked not in self.check_difficulty_state():
+            return
+        if not self.deathlink:
+            return
         if self.deathlink_received:
-            self.deathlink_received = False
-            self.game_state_manager.set_level_speed(10000)
+            print("got deathlink")
 
-        pass
+            self.game_state_manager.set_level_speed(100000.0)
+            return
+        if not self.death_has_come and not self.deathlink_received:
+
+            if self.game_state_current_game_state == ZumaDeluxeGameState.GAME_OVER_ADVENTURE or self.game_state_current_game_state == ZumaDeluxeGameState.GAME_OVER_GAUNTLET:
+                self.death_has_come = True
+
+            if self.lost_a_live:
+                self.death_has_come = True
+            if self.death_has_come:
+                self.send_death = True
+        else:
+            if self.game_state_current_game_state == ZumaDeluxeGameState.PLAYING:
+                self.death_has_come = False
+
+
+
 
     def check_for_completed_locations(self):
         if self.game_state_in_level != ZumaDeluxeInLevel.LEVEL:
@@ -938,13 +972,13 @@ class GameController:
     def check_item(self, name: str)->int:
         if name not in self.received_items:
             self.received_items[name] = 0
-
         return  self.received_items[name]
     def check_sun_idols(self)->int:
         return self.check_item("Sun Idol")
 
     def check_progressive_lives(self)->int:
-        return self.check_item("Progressive Lives")
+
+        return self.check_item("Progressive Lives")+1
 
     def reset_level(self):
         self.game_last_balls = 0
@@ -958,6 +992,7 @@ class GameController:
         self.game_last_score = self.game_score
         self.base_level_speed = self.level_speed
         self.checked_clear = False
+        self.deathlink_received = False
 
     def reset_area(self):
         self.game_area_coins = 0
@@ -968,3 +1003,7 @@ class GameController:
         self.game_last_difficulty = self.game_difficulty
         self.game_area_max_combo = 0
         self.game_state_manager.set_lives(self.check_progressive_lives())
+        self.last_live = self.check_progressive_lives()
+        self.lost_a_live = False
+        self.deathlink_received = False
+

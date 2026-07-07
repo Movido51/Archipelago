@@ -32,6 +32,7 @@ class GameState(NamedTuple):
     level_speed: float = 0
     actual_time: int = 0
     ace_time_bool: bool = False
+    actual_live: int = -1
 
 
 
@@ -388,6 +389,16 @@ class GameStateManager:
             print("failed to get actual score")
             return False
 
+    def get_lives(self)->int:
+        if self.lives_address is None:
+            return -1
+        try:
+            actual: int = self.process.read_int(self.lives_address)
+            return actual
+        except Exception:
+            print("failed to get lives")
+            return -1
+
     def set_lives(self,new_lives:int)->bool:
         if self.lives_address is None:
             return False
@@ -395,7 +406,6 @@ class GameStateManager:
             self.process.write_int(self.lives_address, new_lives)
             return True
         except Exception:
-            print("failed to set lives")
             return False
 
     def add_lives(self,add:int)->bool:
@@ -437,15 +447,20 @@ class GameStateManager:
     def set_level_speed(self,new_speed:float)->bool:
         if self.principal_speed_address is None:
             return False
+
+        try:
+            self.process.write_float(self.principal_speed_address, new_speed)
+        except Exception:
+            print("unable to set speed primary")
+            return False
         if self.secondary_speed_address is None:
             return False
         try:
-            self.process.write_float(self.principal_speed_address, new_speed)
             self.process.write_float(self.secondary_speed_address, new_speed)
-            return True
         except Exception:
-            print("unable to set speed")
+            print("unable to set speed secondary")
             return False
+        return True
 
     def got_ace_time(self)->bool:
         if self.ace_time_address is None:
@@ -526,7 +541,8 @@ class GameStateManager:
             base_score = self.get_base_score(),
             max_combo=self.get_max_combo(),
             level_speed=self.get_level_speed(),
-            ace_time_bool=self.got_ace_time()
+            ace_time_bool=self.got_ace_time(),
+            actual_live= self.get_lives()
 
         )
 

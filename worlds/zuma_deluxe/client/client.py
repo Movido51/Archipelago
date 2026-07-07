@@ -197,6 +197,12 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
 
             # UI Tabs
             self.ui.update_tabs()
+    def on_deathlink(self, data: Dict[str, Any]) -> None:
+        super().on_deathlink(data)
+        print("received deathlink")
+        if self.game_controller.deathlink:
+            print("absorbed deathlink deathlink")
+            self.game_controller.deathlink_received = True
 
     async def controller(self):
 
@@ -258,6 +264,11 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
                     except KeyError:
                         print(location+ " doesnt exist")
                 await self.check_locations(checked_location_ids)
+                #Check Deathlink
+                if self.game_controller.send_death:
+                    await self.send_death(f"{self.player_names[self.slot]} could not survive the zumaic insanity")
+                    self.game_controller.send_death = False
+
                 # Check for Goal Completion
                 if self.game_controller.goal_completed:
                     await self.send_msgs([

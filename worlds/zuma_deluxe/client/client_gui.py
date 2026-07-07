@@ -34,7 +34,7 @@ class ZumaDeluxeManager(GameManager):
         self.zuma_deluxe_tab = self.add_client_tab("Zuma Deluxe", self.zuma_deluxe_tab_layout)
 
         self.zuma_deluxe_tab_cheat_layout = CheatsAndList(self.ctx)
-        self.zuma_deluxe_tab_cheat = self.add_client_tab("Manual Zuma Deluxe", self.zuma_deluxe_tab_cheat_layout)
+        #self.zuma_deluxe_tab_cheat = self.add_client_tab("Manual Zuma Deluxe", self.zuma_deluxe_tab_cheat_layout)
         return container
 
 
