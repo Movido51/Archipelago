@@ -5,8 +5,6 @@ from pymem import Pymem
 from pymem.process import close_handle, list_processes
 from pymem.ressources.structure import ProcessEntry32
 
-
-
 from .enums import (
     ZumaDeluxeInLevel,
     ZumaDeluxeGameState,
@@ -43,7 +41,7 @@ class GameStateManager:
     process_name: str = "popcapgame"
 
 
-    signature_address : int = 0x19E10C
+    signature_address : int = 0x64
     signature_string: str = "Zuma"
     base_address: int = 0x19F4A4
 
@@ -154,6 +152,7 @@ class GameStateManager:
 
     @property
     def game_state_struct_address(self) -> Optional[int]:
+        #return self._resolve_address(0x19F4A4,(-0x1325,0x00))
         return 0x001AE3D0
 
 
@@ -222,7 +221,9 @@ class GameStateManager:
         if self.game_state_struct_address is None:
             return None
         try:
+
             game_state_value: int = self.process.read_int(self.game_state_struct_address)
+
             if game_state_value == 3:
                 game_state_value = 1
             if game_state_value == 83279404:
@@ -563,14 +564,17 @@ class GameStateManager:
             for pid in candidate_pids:
                 try:
                     process: Pymem = Pymem(pid)
-                    address: int = process.base_address + self.signature_address
 
-                    if process.read_string(address, len(self.signature_string)) == self.signature_string:
+                    address: int = process.read_uint(process.base_address + self.base_address)
+
+                    name: str =process.read_string(address+self.signature_address, len(self.signature_string))
+                    if name == self.signature_string:
                         self.process = process
                         self.is_process_running = True
 
                         break
                 except Exception:
+                    print(f"{pid} broke")
                     pass
 
             if not self.is_process_running:

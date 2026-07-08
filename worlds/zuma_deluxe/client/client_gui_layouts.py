@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 from typing import List
 
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
@@ -11,6 +14,8 @@ from kivy.uix.textinput import TextInput
 from ..gameControl.enums import ZumaDeluxeMode
 from ..gameControl.game_controller import SectionState
 from .client import ZumaDeluxeContext
+
+
 
 class CheatLocation(BoxLayout):
     ctx: ZumaDeluxeContext
@@ -746,6 +751,7 @@ class ZumaDeluxeLevelsLayout(BoxLayout):
 
 class ZumaDeluxeContent(BoxLayout):
     ctx: ZumaDeluxeContext
+    float_manager: ZumaDeluxeFloatBase
 
     layout_goal_progression: ZumaDeluxeGoalLayout
     layout_bag: Label
@@ -757,9 +763,10 @@ class ZumaDeluxeContent(BoxLayout):
 
 
 
-    def __init__(self, ctx: ZumaDeluxeContext) -> None:
+    def __init__(self, ctx: ZumaDeluxeContext, float_manager:  ZumaDeluxeFloatBase) -> None:
         super().__init__(orientation="vertical", padding="5dp")
         self.ctx = ctx
+        self.float_manager = float_manager
 
         self.layout_goal_progression = ZumaDeluxeGoalLayout(ctx=ctx)
         self.add_widget(self.layout_goal_progression)
@@ -796,7 +803,23 @@ class ZumaDeluxeContent(BoxLayout):
 
             with open("zuma_deluxe_errors.log", "a") as f:
                 f.write(traceback.format_exc() + "\n\n")
+#float messages
 
+
+
+class ZumaDeluxeFloatBase(FloatLayout):
+    ctx: ZumaDeluxeContext
+    main_layout: ZumaDeluxeContent
+
+
+    def __init__(self, ctx :ZumaDeluxeContext) -> None:
+        super().__init__(
+            size_hint=(1, 1),
+            pos_hint={"x": 0, "y": 0}
+        )
+        self.ctx = ctx
+        main_layout = ZumaDeluxeContent(ctx=ctx,float_manager= self)
+        self.add_widget(main_layout)
 
 
 class ZumaDeluxeTabLayout(BoxLayout):
@@ -804,7 +827,7 @@ class ZumaDeluxeTabLayout(BoxLayout):
     layout_content: BoxLayout
 
     layout_content: BoxLayout
-    layout_content_zuma_deluxe: ZumaDeluxeContent
+    layout_content_zuma_deluxe: ZumaDeluxeFloatBase
 
     layout_not_connected: NotConnectedLayout
 
@@ -838,7 +861,7 @@ class ZumaDeluxeTabLayout(BoxLayout):
 
 
         if not len(self.layout_content.children):
-            self.layout_content_zuma_deluxe = ZumaDeluxeContent(ctx=self.ctx)
+            self.layout_content_zuma_deluxe = ZumaDeluxeFloatBase(ctx=self.ctx)
             self.layout_content.add_widget(self.layout_content_zuma_deluxe)
 
 def lerp(v1, v2, t):

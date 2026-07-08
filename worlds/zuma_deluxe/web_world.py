@@ -24,7 +24,7 @@ class ZumaDeluxeWebWorld(WebWorld):
 
     tutorials = [setup_en]
     option_groups = option_groups
-    #options_presets = options_presets
+    #options_presets = option_presets
 
 
 
