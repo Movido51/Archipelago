@@ -132,56 +132,54 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
                 self.game_controller.selected_gauntlet_levels = [
                     ZumaDeluxeBoards(board_name) for board_name in _args["slot_data"]["gauntlet_selected_levels"]
                 ]
+                # self.game_controller.selected_starter_gauntlet = _args["slot_data"].get("gauntlet_stater_level")
+                try:
+                    self.game_controller.selected_goal_level_gauntlet = ZumaDeluxeBoards(
+                        _args["slot_data"]["gauntlet_goal"])
+                except Exception:
+                    pass
+                # set de niveles Gauntlet
 
-            #self.game_controller.selected_starter_gauntlet = _args["slot_data"].get("gauntlet_stater_level")
-            try:
-                self.game_controller.selected_goal_level_gauntlet = ZumaDeluxeBoards(_args["slot_data"]["gauntlet_goal"])
-            except Exception:
-                pass
+                gauntlet_dict: Dict[ZumaDeluxeBoards, List[SectionState]] = {}
+                for board in ZumaDeluxeBoards:
+                    state: SectionState
+                    if board in self.game_controller.selected_gauntlet_levels:
+                        state = SectionState.Blocked
+                        gauntlet_dict[board] = [state]
+
+                        if board == self.game_controller.selected_goal_level_gauntlet:
+                            state = SectionState.GoalLocked
+                            gauntlet_dict[board].append(state)
+
+                if self.game_controller.selected_goal_level_gauntlet not in self.game_controller.selected_gauntlet_levels and self.game_controller.selected_goal_level_gauntlet is not None:
+                    gauntlet_dict[self.game_controller.selected_goal_level_gauntlet] = [SectionState.GoalLocked]
+
+                self.game_controller.gauntlet_selection = gauntlet_dict
+
+
 
             if self.game_controller.mode != ZumaDeluxeMode.GAUNTLET:
                 self.game_controller.selected_adventure_levels = [
                     ZumaDeluxeStages(stage_name) for stage_name in _args["slot_data"]["adventure_selected_levels"]
                 ]
 
-            #self.game_controller.selected_starter_adventure = _args["slot_data"].get("adventure_stater_level")
-            try:
-                self.game_controller.selected_goal_level_adventure = ZumaDeluxeStages(_args["slot_data"]["adventure_goal"])
-            except Exception:
-                pass
+                #self.game_controller.selected_starter_adventure = _args["slot_data"].get("adventure_stater_level")
+                try:
+                    self.game_controller.selected_goal_level_adventure = ZumaDeluxeStages(_args["slot_data"]["adventure_goal"])
+                except Exception:
+                    pass
+                adventure_dict: Dict[ZumaDeluxeStages, List[SectionState]] = {}
+                for stage in ZumaDeluxeStages:
+                    state: SectionState
+                    if stage in self.game_controller.selected_adventure_levels:
+                        state = SectionState.Blocked
+                    else:
+                        state = SectionState.NoneSelected
 
-
-            # set de niveles Gauntlet
-
-            gauntlet_dict: Dict[ZumaDeluxeBoards,List[SectionState]] = {}
-            for board in ZumaDeluxeBoards:
-                state: SectionState
-                if board in self.game_controller.selected_gauntlet_levels:
-                    state = SectionState.Blocked
-                    gauntlet_dict[board] = [state]
-
-                    if board == self.game_controller.selected_goal_level_gauntlet:
-                        state = SectionState.GoalLocked
-                        gauntlet_dict[board].append(state)
-
-            if self.game_controller.selected_goal_level_gauntlet not in self.game_controller.selected_gauntlet_levels and self.game_controller.selected_goal_level_gauntlet is not None:
-                gauntlet_dict[self.game_controller.selected_goal_level_gauntlet] = [SectionState.GoalLocked]
-
-            self.game_controller.gauntlet_selection = gauntlet_dict
-
-
-            adventure_dict: Dict[ZumaDeluxeStages, List[SectionState]] = {}
-            for stage in ZumaDeluxeStages:
-                state: SectionState
-                if stage in self.game_controller.selected_adventure_levels:
-                    state = SectionState.Blocked
-                else:
-                    state = SectionState.NoneSelected
-
-                adventure_dict[stage] = [state]
-                if stage == self.game_controller.selected_goal_level_adventure:
-                    adventure_dict[stage] = [SectionState.GoalLocked]
-            self.game_controller.adventure_selection= adventure_dict
+                    adventure_dict[stage] = [state]
+                    if stage == self.game_controller.selected_goal_level_adventure:
+                        adventure_dict[stage] = [SectionState.GoalLocked]
+                self.game_controller.adventure_selection= adventure_dict
 
             # Data Storage
             self.data_storage_key = f"zuma_deluxe_{self.team}_{self.slot}"

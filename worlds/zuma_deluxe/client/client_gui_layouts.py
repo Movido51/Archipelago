@@ -695,8 +695,9 @@ class ZumaDeluxeLevelsLayout(BoxLayout):
             self.layout_header.add_widget(self.button_adventure)
             self.layout_header.add_widget(self.button_gauntlet)
         else:
+
             label_mode = Label(
-                text = self.actual_mode.value,
+                text = self.actual_mode.name.capitalize(),
                 halign="center"
             )
             self.layout_header.add_widget(label_mode)
