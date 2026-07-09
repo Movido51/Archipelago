@@ -389,6 +389,8 @@ class GameController:
                         self.moved_up = True
                     self.checked_clear = False
                     #self.reset_level()
+                    self.game_up_area = self.game_actual_area
+                    self.game_up_level = self.game_actual_sub_level
                     self.game_state_last_level = self.game_state_current_level
                     self.game_last_score = self.game_score
                     self.base_level_speed = self.level_speed

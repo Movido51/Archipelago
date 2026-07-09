@@ -25,7 +25,7 @@ class ZumaDeluxeCommandProcessor(CommonClient.ClientCommandProcessor):
     def _cmd_deathlink(self):
         """If your Death Link setting is set to "Toggle", use this command to turn Death Link on and off."""
         if self.ctx.game_controller.deathlink_option is not None:
-            if self.ctx.game_controller.deathlink_option  == "Toggle":
+            if self.ctx.game_controller.deathlink_option  == 1:
                 if self.ctx.game_controller.deathlink:
                     self.ctx.death_link = False
                     self.output(f"Death Link turned off")
@@ -35,7 +35,7 @@ class ZumaDeluxeCommandProcessor(CommonClient.ClientCommandProcessor):
 
             else:
                 self.output(f"'death_link' is not set to 'toggle' for this seed.")
-                self.output(f"'death_link' = " + str(self.ctx.slot_data["death_link"]))
+                self.output(f"'death_link' = " + str(self.ctx.game_controller.deathlink_option))
         else:
             self.output(
                 f"No 'death_link' in slot_data keys. You probably aren't connected or are playing an older seed.")
@@ -124,6 +124,7 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
 
             self.game_controller.deathlink_option = _args["slot_data"]["death_link"]
             self.game_controller.deathlink = self.game_controller.deathlink_option != 0
+
 
 
             # # Generation Data
