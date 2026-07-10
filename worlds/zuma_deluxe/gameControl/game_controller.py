@@ -284,8 +284,10 @@ class GameController:
         game_state: GameState = self.game_state_manager.get_game_state()
 
         self.game_state_in_level = game_state.playing
-        self.game_state_current_game_state = game_state.game_state_in_game
-        if game_state.current_level is not None:
+
+        self.game_state_current_game_state  = game_state.game_state_in_game
+
+        if game_state.current_level is not None and self.game_state_current_game_state == ZumaDeluxeGameState.PLAYING:
             self.game_state_current_level = game_state.current_level
 
         if game_state.gauntlet_level is not None:
@@ -331,6 +333,11 @@ class GameController:
                 self.game_state_current_game_mode = ZumaDeluxeMode.GAUNTLET
             if self.game_state_current_game_mode == ZumaDeluxeMode.ADVENTURE:
 
+                if self.game_state_current_game_state != ZumaDeluxeGameState.PLAYING and ZumaDeluxeGameState.DANGER != self.game_state_current_game_state:
+                    self.reset_level()
+                    return
+
+
                 base_level = self.game_state_current_level
                 if base_level is None:
                     base_level = 0
@@ -357,7 +364,7 @@ class GameController:
                 self.game_actual_level = " Lvl "+ (stage_number+1).__str__() +"-"+level_number.__str__() + " " + list(ZumaDeluxeBoards)[board_number].value.split("- ")[1]
                 self.game_actual_area = self.game_actual_section.value.split("- ")[1]
                 self.game_actual_sub_level = self.game_actual_area + " - " +list(ZumaDeluxeBoards)[board_number].value.split("- ")[1]
-
+                self.game_state_last_level = self.game_state_current_level
             else:
 
                 self.game_actual_section = list(ZumaDeluxeBoards)[self.last_game_state_gauntlet_board]
@@ -404,8 +411,7 @@ class GameController:
 
 
 
-            if self.game_state_current_game_state == ZumaDeluxeGameState.PREPARING:
-                self.reset_level()
+            if self.game_state_current_game_state == ZumaDeluxeGameState.PLAYING:
                 if self.game_actual_section != self.game_last_section:
                     self.reset_area()
 
@@ -429,12 +435,13 @@ class GameController:
             self.game_actual_area = ""
             self.game_up_level = ""
             self.game_actual_sub_level = ""
+            self.game_actual_level = ""
 
 
     def score_control(self):
         if self.game_state_in_level != ZumaDeluxeInLevel.LEVEL:
             return
-        if self.game_state_current_game_state != ZumaDeluxeGameState.PLAYING:
+        if self.game_state_current_game_state != ZumaDeluxeGameState.PLAYING and self.game_state_current_game_state != ZumaDeluxeGameState.DANGER:
             return
         if self.game_state_current_game_mode is None:
             return
@@ -579,6 +586,8 @@ class GameController:
             return False
 
     def toggle_item_su_type(self, item_type:str):
+        if self.game_actual_section is None:
+            return
         stage_name: str = self.game_actual_section.value.split("- ")[1]
         item_name: str = stage_name + " (" + item_type + ")"
         if self.have_item_su_type(item_type):
@@ -612,7 +621,7 @@ class GameController:
             return
         if not self.death_has_come and not self.deathlink_received:
 
-            if self.game_state_current_game_state == ZumaDeluxeGameState.GAME_OVER_ADVENTURE or self.game_state_current_game_state == ZumaDeluxeGameState.GAME_OVER_GAUNTLET:
+            if self.game_state_current_game_state == ZumaDeluxeGameState.GAME_OVER:
                 self.death_has_come = True
 
             if self.lost_a_live:
@@ -630,9 +639,6 @@ class GameController:
         if self.game_state_in_level != ZumaDeluxeInLevel.LEVEL:
             return
         if self.game_state_current_game_mode is None:
-            if not (self.game_state_current_game_state == ZumaDeluxeGameState.PLAYING
-                    or self.game_state_current_game_state == ZumaDeluxeGameState.CLEAR_GAUNTLET or self.game_state_current_game_state == ZumaDeluxeGameState.CLEAR_ADVENTURE):
-                return
             return
         if self.game_actual_section is None:
             return
@@ -673,7 +679,7 @@ class GameController:
             self.send_location(self.game_actual_area + " (Combo Max)")
         if self.game_area_chains >= self.chain:
             self.send_location(self.game_actual_area + " (Chain)")
-        if ((self.game_state_current_game_state == ZumaDeluxeGameState.CLEAR_GAUNTLET or self.game_state_current_game_state == ZumaDeluxeGameState.CLEAR_ADVENTURE)
+        if (self.game_state_current_game_state == ZumaDeluxeGameState.CLEAR_MENU
                 and not self.checked_clear):
             clear: str = self.game_actual_sub_level + " (Level Clear)"
             print("entering checker")
@@ -772,7 +778,7 @@ class GameController:
 
         if self.game_state_in_level != ZumaDeluxeInLevel.LEVEL:
             return
-        if self.game_state_current_game_state != ZumaDeluxeGameState.PLAYING:
+        if self.game_state_current_game_state != ZumaDeluxeGameState.PLAYING and self.game_state_current_game_state != ZumaDeluxeGameState.DANGER:
             return
         if self.game_state_current_game_mode is None:
             return
@@ -834,18 +840,17 @@ class GameController:
                 act = 0
             self.filler_items_checks[item["name"]] = act
 
-    prepare_level = False
+    ready_level = False
     def harder_goal(self):
         if not SectionState.GoalUnlocked in self.check_difficulty_state():
             return
         if  not isinstance(self.game_actual_section, ZumaDeluxeStages):
             return
-        if self.game_state_current_game_state is not ZumaDeluxeGameState.PREPARING:
-            self.prepare_level = False
+        if self.game_state_current_game_state is not ZumaDeluxeGameState.PLAYING:
+            self.ready_level = False
+        if self.ready_level:
             return
-        if self.prepare_level:
-            return
-        self.prepare_level = True
+        self.ready_level = True
         suns = self.sun_idols_helpers - self.check_sun_idols()
         total_extra_amount:int = suns * 2000
         extra_level_amounts: int = 0

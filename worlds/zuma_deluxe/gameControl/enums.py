@@ -6,14 +6,15 @@ class ZumaDeluxeInLevel(enum.Enum):
 
 class ZumaDeluxeGameState(enum.Enum):
     OTHER = -1
-    MENU = 1762492
-    PREPARING = 0
-    PLAYING = 1
-    CHANGE = 1866994645
-    CLEAR_ADVENTURE = 61
-    GAME_OVER_GAUNTLET = -2883723
-    GAME_OVER_ADVENTURE = -11600032
-    CLEAR_GAUNTLET = 1764884
+    STARTING = 24
+    MAIN_MENU = 28
+
+    ADVENTURE_MENU = 32
+    GAUNTLET_MENU = 34
+    CLEAR_MENU = 38
+    PLAYING = 0
+    GAME_OVER = 39
+    DANGER = 36
 
 class ZumaDeluxeMode(enum.Enum):
     ADVENTURE = 0

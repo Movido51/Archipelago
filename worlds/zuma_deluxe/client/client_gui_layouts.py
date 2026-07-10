@@ -312,7 +312,7 @@ class CheatsAndList(BoxLayout):
         self.layout_content.add_widget(CheatItem(ctx=ctx))
 
         self.layout_items_toggle = CheatLevelItems(ctx=ctx)
-        self.layout_content.add_widget(self.layout_items_toggle)
+        #self.layout_content.add_widget(self.layout_items_toggle)
 
         self.layout_in_List = CheatsScroll(ctx=ctx)
         self.layout_content.add_widget(self.layout_in_List)

@@ -27,7 +27,7 @@ class ZumaDeluxeCommandProcessor(CommonClient.ClientCommandProcessor):
         if self.ctx.game_controller.deathlink_option is not None:
             if self.ctx.game_controller.deathlink_option  == 1:
                 if self.ctx.game_controller.deathlink:
-                    self.ctx.death_link = False
+                    self.ctx.game_controller.death_link = False
                     self.output(f"Death Link turned off")
                 else:
                     self.ctx.game_controller.death_link = True

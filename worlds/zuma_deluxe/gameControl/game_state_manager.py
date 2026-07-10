@@ -152,7 +152,8 @@ class GameStateManager:
 
     @property
     def game_state_struct_address(self) -> Optional[int]:
-        #return self._resolve_address(0x19F4A4,(-0x1325,0x00))
+        return self.process.read_uint(self.process.base_address + 0x19F4A4) + 0x794
+        return self._resolve_address(0x19F4A4,(-0x1348))
         return 0x001AE3D0
 
 
@@ -217,24 +218,17 @@ class GameStateManager:
             return None
         return self.process.read_uint(self.reserve_ball_address) + 0x8
 
-    def get_current_game_state(self)-> Optional[ZumaDeluxeGameState]:
+    def get_current_game_state(self)-> ZumaDeluxeGameState:
         if self.game_state_struct_address is None:
-            return None
+            return ZumaDeluxeGameState.OTHER
         try:
 
             game_state_value: int = self.process.read_int(self.game_state_struct_address)
 
-            if game_state_value == 3:
-                game_state_value = 1
-            if game_state_value == 83279404:
-                game_state_value = 61
-            if game_state_value == 151543608:
-                game_state_value = 0
-            if game_state_value == 152342384:
-                game_state_value = 0
             return ZumaDeluxeGameState(game_state_value)
         except Exception:
-            return ZumaDeluxeGameState.MENU
+            print(f"error getting it in {hex(self.game_state_struct_address)}")
+            return ZumaDeluxeGameState.OTHER
 
     def get_current_level(self) -> Optional[int]:
         if self.current_level_address is None:

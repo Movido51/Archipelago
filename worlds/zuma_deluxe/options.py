@@ -238,7 +238,7 @@ class AdventureLevelAmount(Range):
     Determines how many levels will be picked from your selection from Gauntlet to include in the multiworld.
     """
     display_name = "Adventure Levels Amount"
-    range_start = 4
+    range_start = 3
     range_end = 12
     default = 9
 
