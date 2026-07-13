@@ -258,6 +258,7 @@ class GameController:
             try:
 
                 self._refresh_game_state()
+                self._apply_conditional_game_state()
                 self.back_setup()
                 self.death_linker()
                 self.score_control()
@@ -268,7 +269,7 @@ class GameController:
                 self._check_for_victory()
 
                 #
-                # self._apply_conditional_game_state()
+
                 #
                 # self._check_for_completed_locations()
                 # self._process_received_items()
@@ -318,7 +319,9 @@ class GameController:
             self.lost_a_live = False
         self.last_live = game_state.actual_live
 
-
+    def _apply_conditional_game_state(self)->None:
+        if not self.game_state_manager.are_all_temples_unlocked():
+            self.game_state_manager.unlock_all_temples()
 
 
 

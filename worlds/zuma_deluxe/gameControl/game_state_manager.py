@@ -51,6 +51,7 @@ class GameStateManager:
 
     stage_manager_address: Optional[int]
     game_state_address: Optional[int]
+    save_state_address: Optional[int]
 
     gauntlet_board_address: Optional[int]
 
@@ -217,6 +218,36 @@ class GameStateManager:
         if self.reserve_ball_address is None:
             return None
         return self.process.read_uint(self.reserve_ball_address) + 0x8
+
+    @property
+    def save_state_struct_address(self) -> Optional[int]:
+        return self._resolve_address(0x19F4A4, (0x768,0x000))
+    @property
+    def save_unlocked_temples(self)->Optional[int]:
+        if self.save_state_struct_address is None:
+            return None
+        return self.save_state_struct_address + 0x30
+
+
+
+    def are_all_temples_unlocked(self)-> Optional[bool]:
+        if self.save_unlocked_temples is None:
+            return None
+        try:
+            unlocked_temples: int = self.process.read_int(self.save_unlocked_temples)
+            return unlocked_temples >= 12
+        except Exception:
+            return None
+
+    def unlock_all_temples(self)-> bool:
+        if self.save_unlocked_temples is None:
+            return False
+        try:
+            self.process.write_int(self.save_unlocked_temples, 12)
+            return True
+        except Exception:
+            print("unable to unlock all")
+            return False
 
     def get_current_game_state(self)-> ZumaDeluxeGameState:
         if self.game_state_struct_address is None:
@@ -501,6 +532,7 @@ class GameStateManager:
         self.unique_score_address = self.unique_score_struct_address
         self.difficulty_base_address = self.difficulty_base_struct_address
         self.balls_address = self.balls_struct_address
+        self.save_state_address = self.save_state_struct_address
 
         state: ZumaDeluxeGameState = self.get_current_game_state()
         playing: ZumaDeluxeInLevel
@@ -582,6 +614,7 @@ class GameStateManager:
             self.unique_score_address = self.unique_score_struct_address
             self.difficulty_base_address = self.difficulty_base_struct_address
             self.balls_address = self.balls_struct_address
+            self.save_state_address = self.save_state_struct_address
         except Exception:
             return False
 
@@ -600,6 +633,7 @@ class GameStateManager:
             self.unique_score_address = None
             self.difficulty_base_address = None
             self.balls_address = None
+            self.save_state_address = None
 
             return True
 
@@ -620,6 +654,7 @@ class GameStateManager:
             self.unique_score_address = None
             self.difficulty_base_address = None
             self.balls_address = None
+            self.save_state_address = None
 
             return False
 
