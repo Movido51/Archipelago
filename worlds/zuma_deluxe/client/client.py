@@ -92,8 +92,6 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
 
             # generated
 
-            self.game_controller.deathlink = bool(_args["slot_data"]["death_link"])
-
             self.game_controller.mode = ZumaDeluxeMode(_args["slot_data"]["game_mode"])
             self.game_controller.goal = ZumaDeluxeAPGoals(_args["slot_data"]["goal"])
             self.game_controller.goal_mode = ZumaDeluxeMode(_args["slot_data"]["goal_mode"])

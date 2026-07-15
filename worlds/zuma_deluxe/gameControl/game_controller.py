@@ -5,6 +5,8 @@ import logging
 
 import enum
 
+from Cython.Compiler.Errors import reset
+
 from .enums import (
     ZumaDeluxeGameState,
     ZumaDeluxeInLevel,
@@ -309,7 +311,7 @@ class GameController:
         self.game_state_got_ace_time = game_state.ace_time_bool
 
         self.moved_up = False
-        self.check_goal_level_clear = 0
+        self.check_goal_level_clear = -1
 
         if game_state.actual_live == -1:
             self.last_live = game_state.actual_live
@@ -339,6 +341,7 @@ class GameController:
                 if self.game_state_current_game_state != ZumaDeluxeGameState.PLAYING and ZumaDeluxeGameState.DANGER != self.game_state_current_game_state:
                     self.reset_level()
                     return
+                self.checked_clear = False
 
 
                 base_level = self.game_state_current_level
@@ -634,6 +637,9 @@ class GameController:
         else:
             if self.game_state_current_game_state == ZumaDeluxeGameState.PLAYING:
                 self.death_has_come = False
+        if self.game_state_current_game_state == ZumaDeluxeGameState.GAME_OVER or self.lost_a_live:
+            self.reset_level()
+
 
 
 
@@ -644,6 +650,8 @@ class GameController:
         if self.game_state_current_game_mode is None:
             return
         if self.game_actual_section is None:
+            return
+        if self.game_state_current_level is None:
             return
 
         if self.moved_up and SectionState.Unlocked in self.check_state():
@@ -661,7 +669,7 @@ class GameController:
 
                         self.send_location(full_clear)
 
-                    self.check_goal_level_clear = self.game_state_current_level-1 if self.game_state_current_level is not None else 0
+                    self.check_goal_level_clear = self.game_state_current_level-1 if self.game_state_current_level is not None else -1
 
 
         if  SectionState.Unlocked not in self.check_difficulty_state() and SectionState.GoalUnlocked not in self.check_difficulty_state():
@@ -701,7 +709,7 @@ class GameController:
             print(self.game_state_got_ace_time)
             if self.include_ace_time and self.game_state_got_ace_time:
                 self.send_location(self.game_actual_sub_level + " (Ace Time)")
-            self.check_goal_level_clear = self.game_state_current_level if self.game_state_current_level is not None else 0
+            self.check_goal_level_clear = self.game_state_current_level if self.game_state_current_level is not None else -1
             self.checked_clear = True
 
 
@@ -845,14 +853,20 @@ class GameController:
 
     ready_level = False
     def harder_goal(self):
+
         if not SectionState.GoalUnlocked in self.check_difficulty_state():
             return
+
         if  not isinstance(self.game_actual_section, ZumaDeluxeStages):
             return
-        if self.game_state_current_game_state is not ZumaDeluxeGameState.PLAYING:
+
+        if self.game_state_current_game_state is not ZumaDeluxeGameState.PLAYING and self.game_state_current_game_state is not ZumaDeluxeGameState.DANGER:
             self.ready_level = False
+            return
+
         if self.ready_level:
             return
+
         self.ready_level = True
         suns = self.sun_idols_helpers - self.check_sun_idols()
         total_extra_amount:int = suns * 2000
@@ -885,52 +899,59 @@ class GameController:
         if self.game_actual_section is None:
             self.goal_levels = 0
             return
-        if self.check_goal_level_clear == 0:
+        if self.check_goal_level_clear == -1:
             return
-        print("tried goal")
+        #print("tried goal")
         if isinstance(self.game_actual_section, ZumaDeluxeBoards):
-            print("tried gauntlet")
+            #print("tried gauntlet")
             if self.game_actual_section != self.selected_goal_level_gauntlet:
-                print("not same")
+                #print("not same")
                 self.goal_levels = 0
                 return
 
             level_target: int = 0
             dif_lev: int = self.selected_gauntlet_difficulty
             level_target = dif_lev * 7
-            print(f"target dificulty {level_target}")
-            print(f"level{self.check_goal_level_clear}")
+            #print(f"target dificulty {level_target}")
+            #print(f"level{self.check_goal_level_clear}")
             suns = self.sun_idols_helpers - self.check_sun_idols()
             if self.check_goal_level_clear >= level_target:
                 if self.goal_levels >= suns:
                     self.goal_completed = True
-                    print("done")
+                    #print("done")
                     return
-                print("not amount of levels")
+                #print("not amount of levels")
                 print(suns)
                 self.goal_levels += 1
                 print(self.goal_levels)
 
         if isinstance(self.game_actual_section, ZumaDeluxeStages):
+            #print("tried adventure")
             if self.game_actual_section != self.selected_goal_level_adventure:
+                #print("not same")
                 self.goal_levels = 0
                 return
             dif_lev: int = self.game_state_current_level
+            #print(f"level {dif_lev}")
             if dif_lev < 15:
                 total_lev = 5
             elif dif_lev < 33:
                 total_lev = 6
             else:
                 total_lev = 7
+            #print(f"total levels{total_lev}")
             self.goal_levels += 1
+            #print(self.goal_levels)
             if self.goal_levels >= total_lev:
                 self.goal_completed = True
-                print("done")
+                #print("done")
                 return
-            print("not amount of levels")
-            print(total_lev)
+            #print("not amount of levels")
+            #print(total_lev)
 
             print(self.goal_levels)
+
+
 
 
 
@@ -996,13 +1017,13 @@ class GameController:
         self.game_last_actual_combo = 0
         self.game_last_total_combo = 0
         self.game_last_chains = 0
-
         self.game_missing_score = 0
         self.game_state_last_level = self.game_state_current_level
         self.game_last_score = self.game_score
         self.base_level_speed = self.level_speed
-        self.checked_clear = False
         self.deathlink_received = False
+        self.ready_level = False
+
 
     def reset_area(self):
         self.game_area_coins = 0

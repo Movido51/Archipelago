@@ -18,6 +18,6 @@ components.append(
     )
 )
 
-icon_paths["zuma_deluxe"] = f"ap:{__name__}/icon.png"
+icon_paths["zuma_deluxe"] = f"ap:{__name__}/client/assets/icon.png"
 
 
