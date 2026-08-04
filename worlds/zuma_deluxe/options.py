@@ -111,37 +111,36 @@ class AceTime(Toggle):
     Add the Ace-Time of each level as locations.
     """
     display_name = "Ace Time"
+
+class PointSanity(DefaultOnToggle):
+    """
+    Add the points items per level to the item pool
+    """
+    display_name = "Points Sanity"
+
+class TrickShotsLocation(DefaultOnToggle):
+    """
+    enable the locations for the different actions
+    """
+    display_name = "Trick Shots"
 class Coins(Range):
     """
-    Choose the multiplier percentage to the amount of coins needed per Section (Board Difficulty or Stage) to send the location.
-
-    The base amount is calculated on the amount of levels per Section, 7 in gauntlet, 5-7 in adventure.
-
-    For reference decimals will go up.
-    50% : 4 gauntlet 3-4 adventure
-    150% : 11 gauntlet 8-11 adventure
-    Minimum will be 1 coin.
-
+    Choose the target amount for coins per Section.
     """
     display_name = "Coins per Section"
     range_start = 1
-    range_end = 200
-    default = 100
+    range_end = 20
+    default = 7
 
 class Gaps(Range):
     """
-    Amount of gaps shots for each Section.
-    The base amount is calculated on the amount of levels per Section, 7 in gauntlet, 5-7 in adventure.
-
-    For reference decimals will go up.
-    50% : 4 gauntlet 3-4 adventure
-    150% : 11 gauntlet 8-11 adventure
+    Target amount of gaps shots for each Section.
     Minimum will be 1 gap shot.
     """
     display_name = "Gaps per Section"
     range_start = 1
-    range_end = 300
-    default = 100
+    range_end = 30
+    default = 7
 
 class Combo(Range):
     """
@@ -155,8 +154,8 @@ class Combo(Range):
     """
     display_name = "Combos per Section"
     range_start = 1
-    range_end = 500
-    default = 200
+    range_end = 40
+    default = 14
 
 class MaxCombo(Range):
     """
@@ -164,7 +163,7 @@ class MaxCombo(Range):
     """
     display_name = "Max Combo requirement"
     range_start = 2
-    range_end = 5
+    range_end = 10
     default = 3
 
 class Chain(Range):
@@ -174,7 +173,7 @@ class Chain(Range):
 
     display_name = "Chain length"
     range_start = 5
-    range_end = 10
+    range_end = 15
     default = 6
 
 
@@ -287,6 +286,8 @@ class ZumaDeluxeOptions(PerGameCommonOptions):
     sun_idol_unlock: SunIdolUnlock
     sun_idol_helpers: SunIdolHelpers
     ace_time: AceTime
+    point_sanity: PointSanity
+    trick_shots_locations: TrickShotsLocation
     coins: Coins
     gaps: Gaps
     combo: Combo
@@ -319,6 +320,8 @@ option_groups = [
         "Level Options",
         [
             AceTime,
+            PointSanity,
+            TrickShotsLocation,
             Coins,
             Gaps,
             Combo,

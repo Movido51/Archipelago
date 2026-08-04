@@ -5,7 +5,7 @@ import logging
 
 import enum
 
-from Cython.Compiler.Errors import reset
+import math
 
 from .enums import (
     ZumaDeluxeGameState,
@@ -20,6 +20,8 @@ from .enums import (
 from ..items_data import extra_items, Group
 
 from .game_state_manager import GameStateManager, GameState
+
+from ..locations_data import levels_base_speed_adventure
 
 class SectionState(enum.Enum):
     NoneSelected = -1
@@ -124,7 +126,6 @@ class GameController:
     deathlink: bool
 
     level_speed: float
-    base_level_speed: float
 
     check_goal_level_clear: int
 
@@ -144,7 +145,7 @@ class GameController:
 
     #items check
 
-    filler_items_checks: Dict[str,float]
+    filler_items_times: Dict[str,float]
     checked_clear: bool
     deathlink_received: bool
     death_has_come:bool
@@ -186,7 +187,6 @@ class GameController:
         self.moved_up = False
         self.game_state_last_level = 0
         self.level_speed = 0.0
-        self.base_level_speed = 0.0
 
         #Generation Options
         self.goal = None
@@ -228,9 +228,7 @@ class GameController:
 
         self.selected_goal_level_gauntlet = None
 
-        self.filler_items_checks = {}
-        for item in extra_items:
-            self.filler_items_checks[item["name"]] = 0.0
+        self.filler_items_times = {}
         self.deathlink_received = False
         self.death_has_come = False
         self.send_death = False
@@ -406,7 +404,8 @@ class GameController:
                     self.game_up_level = self.game_actual_sub_level
                     self.game_state_last_level = self.game_state_current_level
                     self.game_last_score = self.game_score
-                    self.base_level_speed = self.level_speed
+                    self.ready_level = False
+                    ### gauntlet changing level
 
 
                 if self.game_last_difficulty != self.game_difficulty:
@@ -442,6 +441,7 @@ class GameController:
             self.game_up_level = ""
             self.game_actual_sub_level = ""
             self.game_actual_level = ""
+            self.game_difficulty = ZumaDeluxeGauntletDifficulties.RABBIT
 
 
     def score_control(self):
@@ -764,24 +764,13 @@ class GameController:
             if item in "Progressive Lives" and self.game_state_in_level == ZumaDeluxeInLevel.LEVEL:
                 self.game_state_manager.add_lives(1)
 
-            if item in self.filler_items_checks:
-                group = Group.FILLER
-                for item_dic in extra_items:
-                    if item == item_dic["name"]:
-                        group = item_dic["group"]
-                        break
-                useful = 10
-                traps = 10
-                time = 1
-                if group == Group.USEFUL:
-                    time = useful
-                elif group == Group.TRAP:
-                    time = traps
-
-
-                self.filler_items_checks[item] += time
-                if self.filler_items_checks[item] > 60:
-                    self.filler_items_checks[item] = 60
+            if item in extra_items:
+                if item not in self.filler_items_times:
+                    self.filler_items_times[item] = 0.0
+                duration = extra_items[item]["duration"]
+                self.filler_items_times[item] += duration
+                if self.filler_items_times[item] > duration * 5:
+                    self.filler_items_times[item] = 60
 
 
 
@@ -795,70 +784,78 @@ class GameController:
             return
         if  SectionState.Unlocked not in self.check_difficulty_state() and SectionState.GoalUnlocked not in self.check_difficulty_state():
             return
-        if self.game_actual_section is None:
+        if self.game_actual_section is None or self.game_state_current_level is None:
             return
 
-        useful =  10
-        traps = 1
-        filler = 1
-        for item in extra_items:
-            name = item["name"]
-            last = self.filler_items_checks[name]
-            if last == 0:
-                continue
-            group = item["group"]
-            setup = filler
-            if group == Group.USEFUL:
-                setup = useful
-            elif group == Group.TRAP:
-                setup = traps
-            act = last - df
-            if act == 0:
+        to_remove = []
+        actual_speed = self.level_speed
+        target_speed = self.get_level_base_speed()
+        for item in self.filler_items_times:
+            last = self.filler_items_times[item]
+            duration = extra_items[item]["duration"]
+            if duration != 0.5:
+                act = last - df
+            else:
+                act = last - duration
+            last *= 2
+            act *= 2
+            if act <= 0:
                 act = -1
-            if last // setup != act // setup:
-                match name:
+            if math.floor(last)!= math.floor(act):
+                match item:
                     case "Happy Sun":
-                        if act > 0:
-                            self.game_state_manager.add_to_score(10)
+                        self.game_state_manager.add_to_score(10)
                     case "Extra Live":
-                        if act > 0:
-                            self.game_state_manager.add_lives(1)
-                    case "Combo Killer Trap":
-                        if act > 0:
-                            self.game_last_actual_combo = 0
-                    case "Extra Coin":
-                        if act > 0:
-                            self.game_area_coins += 1
-                            self.game_state_manager.add_to_score(500)
-                            self.game_last_score += 500
-                    case "Half Score Trap":
-                        dif_score: int = (self.game_score - self.game_base_score)//15
+                        self.game_state_manager.add_lives(1)
+                    case "Combo Killer":
+                        self.game_last_actual_combo = 0
+                    case "Chain Breaker":
+                        self.game_last_chains = 0
+                    case "Half Score":
+                        dif_score: int = (self.game_score - self.game_base_score) // 2
                         self.game_state_manager.add_to_score(-dif_score)
                         self.game_last_score -= dif_score
+                    case "Extra Coin":
+                        mult: int = self.game_state_manager.get_coin_value()
+                        if mult < 200:
+                            mult = 500
+                        self.game_area_coins += 1
+                        self.game_state_manager.add_to_score(mult)
+                        self.game_last_score += mult
+
                     case "Color Shift Trap":
-                        self.game_state_manager.change_random_color()
+                        maxcolor: int = 4
+                        if self.game_state_current_game_mode == ZumaDeluxeMode.GAUNTLET:
+                            maxcolor = min(self.game_state_current_level // 7 + 4, 6)
+                        else:
+                            if self.game_state_current_level < 15:
+                                maxcolor = 4
+                            elif self.game_state_current_level < 33:
+                                maxcolor = 5
+                            else:
+                                maxcolor = 6
+
+                        self.game_state_manager.change_random_color(maxcolor)
                     case "Rush Trap":
-                        if act < 0:
-                            self.game_state_manager.set_level_speed(self.base_level_speed)
-                        else:
-                            self.game_state_manager.set_level_speed(self.level_speed*2)
+                        double_speed = self.get_level_base_speed() * 2
+                        if actual_speed != double_speed:
+                            target_speed = double_speed
                     case "Get a Break":
-                        if act < 0:
-                            self.game_state_manager.set_level_speed(self.base_level_speed)
-                        else:
-                            self.game_state_manager.set_level_speed(0.0)
+                        break_speed = 0.0
+                        if actual_speed != break_speed:
+                            target_speed = break_speed
             if act < 0:
-                act = 0
-            self.filler_items_checks[item["name"]] = act
+                to_remove.append(item)
+            self.filler_items_times[item]  = act
+
+        if actual_speed != target_speed:
+            self.game_state_manager.set_level_speed(target_speed)
+        for item in to_remove:
+            self.filler_items_times.pop(item)
 
     ready_level = False
     def harder_goal(self):
 
-        if not SectionState.GoalUnlocked in self.check_difficulty_state():
-            return
-
-        if  not isinstance(self.game_actual_section, ZumaDeluxeStages):
-            return
 
         if self.game_state_current_game_state is not ZumaDeluxeGameState.PLAYING and self.game_state_current_game_state is not ZumaDeluxeGameState.DANGER:
             self.ready_level = False
@@ -867,7 +864,17 @@ class GameController:
         if self.ready_level:
             return
 
+        print("harder_level")
         self.ready_level = True
+
+        if not SectionState.Unlocked in self.check_difficulty_state():
+            return
+
+        if not SectionState.GoalUnlocked in self.check_difficulty_state():
+            return
+
+        if  not isinstance(self.game_actual_section, ZumaDeluxeStages):
+            return
         suns = self.sun_idols_helpers - self.check_sun_idols()
         total_extra_amount:int = suns * 2000
         extra_level_amounts: int = 0
@@ -1020,7 +1027,6 @@ class GameController:
         self.game_missing_score = 0
         self.game_state_last_level = self.game_state_current_level
         self.game_last_score = self.game_score
-        self.base_level_speed = self.level_speed
         self.deathlink_received = False
         self.ready_level = False
 
@@ -1037,4 +1043,61 @@ class GameController:
         self.last_live = self.check_progressive_lives()
         self.lost_a_live = False
         self.deathlink_received = False
+
+    def get_level_base_speed(self)-> float:
+        base_speed: float = 0.5
+        if isinstance(self.game_actual_section, ZumaDeluxeStages):
+            base_speed = levels_base_speed_adventure[self.get_adventure_str()]
+        elif isinstance(self.game_actual_section, ZumaDeluxeBoards):
+            dif_base: int = list(ZumaDeluxeGauntletDifficulties).index(self.game_difficulty)
+            level = self.game_state_current_level if self.game_state_current_level is not None else 0
+            if level < dif_base*7:
+                level = level % 7
+            else:
+                level = level - dif_base*7
+            match(dif_base):
+                case 0:
+                    if level < 3:
+                        base_speed = 0.5+level*0.1
+                    else:
+                        base_speed = 0.6 + level*0.05
+
+                    if base_speed > 0.9:
+                        base_speed = 0.9
+                case 1:
+                    base_speed = 0.7 + level * 0.05
+                    if base_speed > 0.95:
+                        base_speed = 0.95
+                case 2:
+                    if level < 3:
+                        base_speed = 0.8+level*0.05
+                    else:
+                        base_speed = 0.85 + ((level+1)//2) * 0.05
+                    if base_speed > 1.2:
+                        base_speed = 1.2
+                case 3:
+                    base_speed = 0.95 + ((level + 1) // 2) * 0.05
+                    if base_speed > 1.5:
+                        base_speed = 1.5
+        return base_speed
+
+    def get_adventure_str(self)-> str:
+        level = self.game_state_current_level if self.game_state_current_level is not None else 0
+        temple: int = 1
+        base_temple_level: int = 1
+        sub_level = 0
+        if level < 15:
+            temple += level // 5
+            sub_level += (level % 5)
+        elif level < 33:
+            temple  += ((level - 15) // 6) + 3
+            sub_level += ((level - 15) % 6)
+        else:
+            temple += ((level - 33) // 7) + 6
+            sub_level += ((level - 33) % 7)
+
+        return f"{temple}-{sub_level}"
+
+
+
 

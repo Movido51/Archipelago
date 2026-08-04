@@ -176,7 +176,7 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
 
                     adventure_dict[stage] = [state]
                     if stage == self.game_controller.selected_goal_level_adventure:
-                        adventure_dict[stage] = [SectionState.GoalLocked]
+                        adventure_dict[stage] = [SectionState.GoalLocked, SectionState.Blocked]
                 self.game_controller.adventure_selection= adventure_dict
 
             # Data Storage

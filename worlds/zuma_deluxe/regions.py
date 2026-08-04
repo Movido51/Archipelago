@@ -107,14 +107,15 @@ def regions_for_boards(world: ZumaDeluxe, region_menu: Region)->List[Region]:
             if world.selected_gauntlet_difficulty == board_difficulty:
                 break
             for board_location_data in sub_region_locations_data:
-                board_location_name:str = board_dif_name + " ("+board_location_data+")"
-                location: ZumaDeluxeLocation = ZumaDeluxeLocation(
-                    world.player,
-                    board_location_name,
-                    world.location_name_to_id[board_location_name],
-                    board_dif_region,
-                )
-                board_dif_region.locations.append(location)
+                if board_name != "Space" or board_location_data != "Coins":
+                    board_location_name:str = board_dif_name + " ("+board_location_data+")"
+                    location: ZumaDeluxeLocation = ZumaDeluxeLocation(
+                        world.player,
+                        board_location_name,
+                        world.location_name_to_id[board_location_name],
+                        board_dif_region,
+                    )
+                    board_dif_region.locations.append(location)
             for i in range(1, 8):
                 for level_location_data in sub_level_locations_data:
                     if  not world.include_ace_time and level_location_data == "Ace Time":
@@ -127,10 +128,17 @@ def regions_for_boards(world: ZumaDeluxe, region_menu: Region)->List[Region]:
                         board_dif_region,
                     )
                     if level_location_data == "Ace Time":
-                        rule = HasAny(
-                            board_name+" (Coins)",
+                        rules = []
+                        if board_name != "Space":
+                            rules = [board_name+" (Coins)",
                             board_name + " (Combos)",
-                            board_name + " (Chains)",
+                            board_name + " (Chains)",]
+                        else:
+                            rules = [
+                            board_name + " (Combos)",
+                            board_name + " (Chains)",]
+                        rule = HasAny(
+                            *rules
                         )
                         world.set_rule(location,rule)
                     board_dif_region.locations.append(location)

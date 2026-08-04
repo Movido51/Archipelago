@@ -16,13 +16,6 @@ if TYPE_CHECKING:
     from .world import ZumaDeluxe
 
 
-item_filler_names: List[str] = [
-    
-]
-
-item_traps_names: List[str] = [
-
-]
 
 class ZumaDeluxeItem(Item):
     game = "Zuma Deluxe"
@@ -55,8 +48,8 @@ def create_item_by_sub_name(world: ZumaDeluxe,sub_item:SubItemDict, name: str) -
 
 
 def create_item(world: ZumaDeluxe,item_dat:ItemData) -> ZumaDeluxeItem:
-
     return ZumaDeluxeItem(item_dat["name"], item_dat["classification"],  world.item_name_to_id[item_dat["name"]],player = world.player)
+
 
 def create_all_items(world: ZumaDeluxe) ->None:
 

@@ -1,5 +1,8 @@
 
 from typing import TypedDict,  List, Dict
+
+from google.protobuf import duration
+
 from BaseClasses import ItemClassification
 import enum
 
@@ -27,28 +30,28 @@ class SubItemDict(ItemData):
         union: Union
 
 class FillerDict(ItemData):
-
+    duration: float
     group: Group
 
 
 sub_item_data: List[SubItemDict] =[
     SubItemDict(
-        name="Coins",
+        name="Coin Points",
         union= Union.SUFIX,
         classification=ItemClassification.progression
     ),
     SubItemDict(
-        name="Gaps",
+        name="Gap Points",
         union= Union.SUFIX,
         classification=ItemClassification.progression
     ),
     SubItemDict(
-        name="Combos",
+        name="Combo Points",
         union= Union.SUFIX,
         classification=ItemClassification.progression
     ),
     SubItemDict(
-        name="Chains",
+        name="Chain Points",
         union= Union.SUFIX,
         classification=ItemClassification.progression
     ),
@@ -58,6 +61,8 @@ sub_item_data: List[SubItemDict] =[
         classification=ItemClassification.progression
     ),
 ]
+
+
 
 item_data: List[ItemData] =[
     ItemData(
@@ -84,49 +89,72 @@ item_data: List[ItemData] =[
 
 ]
 
-extra_items: List[FillerDict] = [
-    FillerDict(
+
+
+extra_items: Dict[str,FillerDict] = {
+    "Happy Sun" : FillerDict(
         name = "Happy Sun",
         group = Group.FILLER,
-        classification=ItemClassification.filler
+        classification=ItemClassification.filler,
+        duration = 0.5
     ),
-    FillerDict(
+    "Extra Live": FillerDict(
         name = "Extra Live",
         group = Group.USEFUL,
-        classification=ItemClassification.useful
+        classification=ItemClassification.useful,
+        duration = 0.5
     ),
-
-    FillerDict(
-        name = "Combo Killer Trap",
+    "Combo Killer": FillerDict(
+        name = "Combo Killer",
         group = Group.TRAP,
-        classification=ItemClassification.trap
+        classification=ItemClassification.trap,
+        duration = 0.5,
     ),
-    FillerDict(
+    "Chain Breaker": FillerDict(
+        name = "Chain Breaker",
+        group = Group.TRAP,
+        classification=ItemClassification.trap,
+        duration = 0.5,
+    ),
+    "Extra Coin": FillerDict(
         name="Extra Coin",
         group = Group.USEFUL,
-        classification=ItemClassification.useful
+        classification=ItemClassification.useful,
+        duration = 0.5,
     ),
-    FillerDict(
-        name="Half Score Trap",
+    "Half Score": FillerDict(
+        name="Half Score",
         group = Group.TRAP,
-        classification=ItemClassification.trap
+        classification=ItemClassification.trap,
+        duration = 0.5,
+
     ),
-    FillerDict(
-        name = "Color Shift Trap",
+    "Color Shift": FillerDict(
+        name = "Color Shift",
         group = Group.TRAP,
-        classification = ItemClassification.trap
+        classification = ItemClassification.trap,
+        duration = 10,
     ),
-    FillerDict(
-        name = "Rush Trap",
+    "Rush": FillerDict(
+        name = "Rush",
         group = Group.TRAP,
-        classification=ItemClassification.trap
+        classification=ItemClassification.trap,
+        duration = 5,
     ),
-    FillerDict(
+    "Get a Break": FillerDict(
         name = "Get a Break",
         group = Group.USEFUL,
-        classification=ItemClassification.useful
+        classification=ItemClassification.useful,
+        duration= 10
+
     ),
-]
+    "Skip": FillerDict(
+        name= "Skip",
+        group= Group.FILLER,
+        classification=ItemClassification.useful,
+        duration = 0.5,
+    )
+}
 
 items_name_to_ids: Dict[str,int] = {
     "Progressive Lives": 1,
@@ -245,7 +273,7 @@ items_name_to_ids: Dict[str,int] = {
     "Zumaic Exodus (Combos)": 52103,
     "Zumaic Exodus (Chains)": 52104,
     "Board Unlock: Zumaic Exodus": 52109,
-    "Space (Coins)": 54701,
+    #"Space (Coins)": 54701,
     "Space (Gaps)": 54702,
     "Space (Combos)": 54703,
     "Space (Chains)": 54704,
