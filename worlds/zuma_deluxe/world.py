@@ -4,7 +4,7 @@ import logging
 
 
 from worlds.AutoWorld import World
-from . import items, regions, rules, web_world, items_data, locations_data, locations, generator
+from . import items, regions, rules, web_world, items_data, locations_data, generator
 from . import options as zuma_deluxe_options
 
 from .gameControl.enums import (
@@ -30,10 +30,15 @@ class ZumaDeluxe(World):
     options_dataclass = zuma_deluxe_options.ZumaDeluxeOptions
     options: zuma_deluxe_options.ZumaDeluxeOptions
 
-    item_name_to_id = items_data.items_name_to_ids
+    item_name_to_id = items_data.items_names_to_ids
     location_name_to_id = locations_data.locations_names_to_ids
 
-    #filler_item_name: List[str] = fillerItems()
+    item_name_groups = items_data.item_name_groups
+    location_name_groups = locations_data.location_name_groups
+
+
+
+
 
     ### Options
 
