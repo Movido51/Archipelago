@@ -12,8 +12,8 @@ from typing import Set, Optional, Dict, Any, List
 
 from ..gameControl.game_controller import GameController, SectionState
 
-from ..items_data import items_name_to_ids,items_ids_to_names
-from ..locations_data import locations_ids_to_names, locations_names_to_ids
+from ..items_data import items_names_to_ids,items_ids_to_names
+from ..locations_data import locations_names_to_ids, locations_ids_to_names
 
 from ..gameControl.enums import *
 
@@ -51,9 +51,10 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
     game_controller: GameController
 
     items_ids_to_names = items_ids_to_names
-    location_names_to_ids = locations_names_to_ids
+    location_ids_to_names = locations_ids_to_names
 
-    items_names_to_ids = items_name_to_ids
+
+    items_names_to_ids = items_names_to_ids
     locations_names_to_ids = locations_names_to_ids
 
     seen_item_indices : Set[int] = set()
@@ -256,7 +257,7 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
                 while len(self.game_controller.completed_locations_queue) > 0:
                     location: str = self.game_controller.completed_locations_queue.popleft()
                     try:
-                        location_id: int = self.location_names_to_ids[location]
+                        location_id: int = self.locations_names_to_ids[location]
                         checked_location_ids.append(location_id)
                     except KeyError:
                         print(location+ " doesnt exist")

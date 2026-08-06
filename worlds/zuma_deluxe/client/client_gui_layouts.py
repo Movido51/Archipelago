@@ -68,12 +68,12 @@ class CheatItem(BoxLayout):
         )
         self.add_widget(self.layout_button)
 
-        self.layout_button.bind(on_press=self.check_location)
+        self.layout_button.bind(on_press=self.cheat_item)
 
-    def check_location(self, _)-> None:
-        location: str = self.layout_text.text
-        print("sending location "+location)
-        self.ctx.game_controller.received_items_queue.append(location)
+    def cheat_item(self, _)-> None:
+        item: str = self.layout_text.text
+        print("sending item "+item)
+        self.ctx.game_controller.received_items_queue.append(item)
 class CheatLevelItems(BoxLayout):
     ctx: ZumaDeluxeContext
     layout_coin: Button
@@ -209,7 +209,7 @@ class CheatsScroll(ScrollView):
         except Exception:
             import traceback
             traceback.print_exc()
-            print("algo aslio mal")
+            print("algo salio mal")
 
 
         self.timer = Clock.schedule_interval(self.update,1.0/10.0)
@@ -246,7 +246,7 @@ class CheatsScroll(ScrollView):
         except Exception:
             import traceback
             traceback.print_exc()
-            print("algo aslio mal")
+            print("algo salio mal")
 
 
 class ListOfPoints(ScrollView):

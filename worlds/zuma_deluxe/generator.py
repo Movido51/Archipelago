@@ -40,6 +40,12 @@ def pre_generate_gauntlet_levels(world: ZumaDeluxe) -> None:
     if world.goal_mode != ZumaDeluxeMode.ADVENTURE:
         if world.goal == ZumaDeluxeAPGoals.SPACE:
             world.selected_goal_level_gauntlet = ZumaDeluxeBoards.Spc_22
+            if ZumaDeluxeBoards.Spc_22 not in world.selected_gauntlet_levels:
+                board_pool = board_pool[:-1 ]
+                board_pool.append(ZumaDeluxeBoards.Spc_22)
+            else:
+                board_pool.remove(ZumaDeluxeBoards.Spc_22)
+                board_pool.append(ZumaDeluxeBoards.Spc_22)
         else:
             world.selected_goal_level_gauntlet = board_pool[-1]
             #board_pool = board_pool[:-1 ]

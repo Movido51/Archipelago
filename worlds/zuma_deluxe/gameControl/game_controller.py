@@ -7,6 +7,7 @@ import enum
 
 import math
 
+from worlds.cv64 import filler_item_names
 from .enums import (
     ZumaDeluxeGameState,
     ZumaDeluxeInLevel,
@@ -685,11 +686,11 @@ class GameController:
         if self.game_area_gaps >= self.gaps:
             self.send_location(self.game_actual_area + " (Gaps)")
         if self.game_area_total_combo >= self.combo:
-            self.send_location(self.game_actual_area + " (Combo)")
+            self.send_location(self.game_actual_area + " (Combos)")
         if self.game_area_max_combo+1 >= self.max_combo:
             self.send_location(self.game_actual_area + " (Combo Max)")
         if self.game_area_chains >= self.chain:
-            self.send_location(self.game_actual_area + " (Chain)")
+            self.send_location(self.game_actual_area + " (Chains)")
         if (self.game_state_current_game_state == ZumaDeluxeGameState.CLEAR_MENU
                 and not self.checked_clear):
             clear: str = self.game_actual_sub_level + " (Level Clear)"
@@ -724,7 +725,7 @@ class GameController:
         while len(self.received_items_queue) > 0:
 
             item: str = self.received_items_queue.popleft()
-            #print(item)
+            print(item)
 
             if item not in self.received_items:
                 self.received_items[item] = 0
@@ -765,6 +766,7 @@ class GameController:
                 self.game_state_manager.add_lives(1)
 
             if item in extra_items:
+                print(item)
                 if item not in self.filler_items_times:
                     self.filler_items_times[item] = 0.0
                 duration = extra_items[item]["duration"]
@@ -786,10 +788,10 @@ class GameController:
             return
         if self.game_actual_section is None or self.game_state_current_level is None:
             return
-
         to_remove = []
         actual_speed = self.level_speed
-        target_speed = self.get_level_base_speed()
+        target_speed = actual_speed
+        trapped_speed = False
         for item in self.filler_items_times:
             last = self.filler_items_times[item]
             duration = extra_items[item]["duration"]
@@ -801,6 +803,8 @@ class GameController:
             act *= 2
             if act <= 0:
                 act = -1
+            if item == "Rush" or item == "Get a Break":
+                trapped_speed = True
             if math.floor(last)!= math.floor(act):
                 match item:
                     case "Happy Sun":
@@ -823,7 +827,7 @@ class GameController:
                         self.game_state_manager.add_to_score(mult)
                         self.game_last_score += mult
 
-                    case "Color Shift Trap":
+                    case "Color Shift":
                         maxcolor: int = 4
                         if self.game_state_current_game_mode == ZumaDeluxeMode.GAUNTLET:
                             maxcolor = min(self.game_state_current_level // 7 + 4, 6)
@@ -836,7 +840,7 @@ class GameController:
                                 maxcolor = 6
 
                         self.game_state_manager.change_random_color(maxcolor)
-                    case "Rush Trap":
+                    case "Rush":
                         double_speed = self.get_level_base_speed() * 2
                         if actual_speed != double_speed:
                             target_speed = double_speed
@@ -844,12 +848,18 @@ class GameController:
                         break_speed = 0.0
                         if actual_speed != break_speed:
                             target_speed = break_speed
+                        else:
+                            if actual_speed == target_speed:
+                                target_speed = self.get_level_base_speed()/2
             if act < 0:
                 to_remove.append(item)
-            self.filler_items_times[item]  = act
+            self.filler_items_times[item]  = act / 2
 
-        if actual_speed != target_speed:
-            self.game_state_manager.set_level_speed(target_speed)
+        if not trapped_speed:
+            self.game_state_manager.set_level_speed(self.get_level_base_speed())
+        else:
+            if actual_speed != target_speed:
+                self.game_state_manager.set_level_speed(target_speed)
         for item in to_remove:
             self.filler_items_times.pop(item)
 
@@ -1085,7 +1095,7 @@ class GameController:
         level = self.game_state_current_level if self.game_state_current_level is not None else 0
         temple: int = 1
         base_temple_level: int = 1
-        sub_level = 0
+        sub_level = 1
         if level < 15:
             temple += level // 5
             sub_level += (level % 5)
