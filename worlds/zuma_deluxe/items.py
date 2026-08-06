@@ -4,10 +4,12 @@ from typing import TYPE_CHECKING, List, Optional
 
 from BaseClasses import Item, ItemClassification
 
-from .items_data import item_data, sub_item_data, SubItemDict,ItemData,Union, FillerDict,extra_items
+from .items_data import sub_item_data, SubItemDict,Union, extra_items, ItemClass, item_data_classification
 from .gameControl.enums import (
     ZumaDeluxeMode,
-    ZumaDeluxeGauntletDifficulties
+    ZumaDeluxeGauntletDifficulties,
+    ZumaDeluxeBoards,
+    ZumaDeluxeStages
 )
 
 
@@ -23,12 +25,11 @@ class ZumaDeluxeItem(Item):
 
 
 def get_random_filler_item_name(world: ZumaDeluxe) -> str:
-    filler_item: FillerDict = world.random.choice(extra_items)
-    return filler_item["name"]
+    return world.random.choice(list(extra_items))
 
 
 def create_item_by_sub_name(world: ZumaDeluxe,sub_item:SubItemDict, name: str) -> ZumaDeluxeItem:
-    item_dat: ItemData
+    item_dat: ItemClass
     new_name: str = ""
     type_name: str = name.split()[0]
     lev_name = name.split("- ")[1]
@@ -36,7 +37,7 @@ def create_item_by_sub_name(world: ZumaDeluxe,sub_item:SubItemDict, name: str) -
         new_name = type_name +" "+ sub_item["name"] +" " + lev_name
     elif sub_item["union"] == Union.SUFIX:
         new_name = lev_name + " ("+ sub_item["name"] + ")"
-    item_dat = ItemData(
+    item_dat = ItemClass(
         name=new_name,
         classification=sub_item["classification"],
     )
@@ -47,7 +48,7 @@ def create_item_by_sub_name(world: ZumaDeluxe,sub_item:SubItemDict, name: str) -
 
 
 
-def create_item(world: ZumaDeluxe,item_dat:ItemData) -> ZumaDeluxeItem:
+def create_item(world: ZumaDeluxe,item_dat:ItemClass) -> ZumaDeluxeItem:
     return ZumaDeluxeItem(item_dat["name"], item_dat["classification"],  world.item_name_to_id[item_dat["name"]],player = world.player)
 
 
@@ -55,7 +56,7 @@ def create_all_items(world: ZumaDeluxe) ->None:
 
 
     item_pool: List[ZumaDeluxeItem] = []
-    for item in item_data:
+    for item in item_data_classification:
         name = item["name"]
         amount:int  = 1
         if name  == "Progressive Lives":
@@ -117,6 +118,8 @@ def generate_items_gauntlet(world: ZumaDeluxe) -> List[ZumaDeluxeItem]:
         board_name: str = board.value
 
         for board_item in sub_item_data:
+            if board == ZumaDeluxeBoards.Spc_22 and "Coin" in board_item["name"]:
+                continue
             item: ZumaDeluxeItem = create_item_by_sub_name(world,board_item,board_name)
             if "Unlock" in board_item["name"] and board == world.selected_starter_gauntlet:
                 world.push_precollected(item)
@@ -138,6 +141,8 @@ def generate_items_adventure(world: ZumaDeluxe) -> List[ZumaDeluxeItem]:
             continue
         stage_name: str = stage.value
         for stage_item in sub_item_data:
+            if stage == ZumaDeluxeStages.SSoZ_13 and "Coin" in stage_item["name"]:
+                continue
             item: ZumaDeluxeItem = create_item_by_sub_name(world,stage_item,stage_name)
             if "Unlock" in stage_item["name"] and stage == world.selected_starter_adventure:
                 world.multiworld.push_precollected(item)
@@ -156,24 +161,21 @@ def generate_items_adventure(world: ZumaDeluxe) -> List[ZumaDeluxeItem]:
 
 def find_and_create_item(world: ZumaDeluxe, name)-> ZumaDeluxeItem:
 
-    for dat in item_data:
+    for dat in item_data_classification:
         name_dat = dat["name"]
         if name_dat != name:
             continue
         return create_item(world, dat)
-    for dat in extra_items:
-        name_dat = dat["name"]
-        if name_dat != name:
-            continue
-        return create_item(world, dat)
+    if name in extra_items:
+        return create_item(world, extra_items[name])
     for dat in sub_item_data:
         name_dat = dat["name"]
         if name_dat in name:
-            item_dat: ItemData = ItemData(
+            item_dat: ItemClass = ItemClass(
                 name = name,
                 classification=dat["classification"],
             )
             return create_item(world, item_dat)
 
 
-    return create_item(world, extra_items[0])
+    return create_item(world, extra_items["Happy Sun"])
