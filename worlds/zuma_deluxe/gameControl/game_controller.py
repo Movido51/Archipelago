@@ -500,7 +500,7 @@ class GameController:
                 count_chains = self.game_chains - 4
             else:
                 count_chains = dif_chains
-                base_chains =self.game_last_chains
+                base_chains =self.game_last_chains-4
             score_chains: int = count_chains * 100
             for i in range(count_chains):
                 score_chains += 10*i+base_chains*10
