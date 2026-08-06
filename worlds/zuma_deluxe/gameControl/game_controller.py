@@ -771,7 +771,7 @@ class GameController:
                     self.filler_items_times[item] = 0.0
                 duration = extra_items[item]["duration"]
                 self.filler_items_times[item] += duration
-                if self.filler_items_times[item] > duration * 5:
+                if self.filler_items_times[item] > 60:
                     self.filler_items_times[item] = 60
 
 
