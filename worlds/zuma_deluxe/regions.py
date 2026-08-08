@@ -130,13 +130,13 @@ def regions_for_boards(world: ZumaDeluxe, region_menu: Region)->List[Region]:
                     if level_location_data == "Ace Time":
                         rules = []
                         if board_name != "Space":
-                            rules = [board_name+" (Coins)",
-                            board_name + " (Combos)",
-                            board_name + " (Chains)",]
+                            rules = [board_name+" (Coin Points)",
+                            board_name + " (Combo Points)",
+                            board_name + " (Chain Points)",]
                         else:
                             rules = [
-                            board_name + " (Combos)",
-                            board_name + " (Chains)",]
+                            board_name + " (Combo Points)",
+                            board_name + " (Chain Points)",]
                         rule = HasAny(
                             *rules
                         )
@@ -255,9 +255,10 @@ def regions_for_stages(world: ZumaDeluxe, region_menu: Region)->List[Region]:
                 )
                 if level_location_data == "Ace Time":
                     rule = HasAny(
-                        stage_name+" (Coins)",
-                        stage_name + " (Combos)",
-                        stage_name + " (Chains)",
+                        stage_name+" (Coin Points)",
+                        stage_name + " (Combo Points)",
+                        stage_name + " (Chain Points)",
+                        #"POINTS ITEM"
                     )
                     world.set_rule(location,rule)
                 stage_region.locations.append(location)

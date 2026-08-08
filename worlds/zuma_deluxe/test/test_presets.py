@@ -11,19 +11,23 @@ from .bases import ZumaDeluxeTestBase
 #class TestHardProgressionPreset(APZumaDeluxe):
  #   options = options_presets["Hard Progression"]
 
-class ZumaDeluxeTestBaseGauntlet(ZumaDeluxeTestBase):
+class TestZumaDeluxeBaseGauntlet(ZumaDeluxeTestBase):
 
     options = {
         "game_mode": 1,
     }
 
-class ZumaDeluxeTestBaseADVENTRE(ZumaDeluxeTestBase):
+class TestZumaDeluxeBaseADVENTRE(ZumaDeluxeTestBase):
     options = {
         "game_mode": 0,
     }
 
 
-class ZumaDeluxeTestBaseExplore(ZumaDeluxeTestBase):
+class TestZumaDeluxeBaseExplore(ZumaDeluxeTestBase):
     options = {
         "game_mode": 2,
+    }
+class TestZumaDeluxeBaseAceTime(ZumaDeluxeTestBase):
+    options = {
+        "ace_time": True,
     }
