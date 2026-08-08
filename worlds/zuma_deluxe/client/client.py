@@ -4,6 +4,8 @@ import sys
 import time
 import urllib.parse
 
+from kivy import logger
+
 import CommonClient
 import NetUtils
 import Utils
@@ -200,7 +202,7 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
         print("received deathlink")
         if self.game_controller.deathlink:
             print("absorbed deathlink deathlink")
-            self.game_controller.deathlink_received = True
+            self.game_controller.speed_multiplier += 1
 
     async def controller(self):
 

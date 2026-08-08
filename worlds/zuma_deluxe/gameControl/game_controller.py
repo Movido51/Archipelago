@@ -148,7 +148,6 @@ class GameController:
 
     filler_items_times: Dict[str,float]
     checked_clear: bool
-    deathlink_received: bool
     death_has_come:bool
     send_death:bool
     last_live: int
@@ -230,7 +229,7 @@ class GameController:
         self.selected_goal_level_gauntlet = None
 
         self.filler_items_times = {}
-        self.deathlink_received = False
+
         self.death_has_come = False
         self.send_death = False
         self.last_live = -1
@@ -261,7 +260,7 @@ class GameController:
                 self._refresh_game_state()
                 self._apply_conditional_game_state()
                 self.back_setup()
-                self.death_linker()
+                self.death_linker(dt)
                 self.score_control()
                 self.check_for_completed_locations()
                 self.process_received_items()
@@ -611,33 +610,30 @@ class GameController:
     def have_chains(self)->bool:
         return self.have_item_su_type("Chains")
 
+    speed_multiplier: float = 1
 
-    def death_linker(self):
+
+    def death_linker(self,delta: float):
 
 
         if self.game_state_in_level != ZumaDeluxeInLevel.LEVEL:
             return
-        if SectionState.Unlocked not in self.check_difficulty_state():
+        if SectionState.Unlocked not in self.check_difficulty_state() and SectionState.GoalUnlocked not in self.check_difficulty_state():
             return
         if not self.deathlink:
             return
-        if self.deathlink_received:
-            print("got deathlink")
-
-            self.game_state_manager.set_level_speed(100000.0)
-            return
-        if not self.death_has_come and not self.deathlink_received:
-
-            if self.game_state_current_game_state == ZumaDeluxeGameState.GAME_OVER:
-                self.death_has_come = True
-
-            if self.lost_a_live:
-                self.death_has_come = True
-            if self.death_has_come:
-                self.send_death = True
+        if self.speed_multiplier > 1:
+            self.speed_multiplier += delta
+            self.death_has_come = True
         else:
-            if self.game_state_current_game_state == ZumaDeluxeGameState.PLAYING:
-                self.death_has_come = False
+            if not self.death_has_come:
+
+                if self.game_state_current_game_state == ZumaDeluxeGameState.GAME_OVER or self.lost_a_live:
+                    self.send_death = True
+                    self.death_has_come = True
+            else:
+                if self.game_state_current_game_state == ZumaDeluxeGameState.PLAYING:
+                    self.death_has_come = False
         if self.game_state_current_game_state == ZumaDeluxeGameState.GAME_OVER or self.lost_a_live:
             self.reset_level()
 
@@ -856,10 +852,10 @@ class GameController:
             self.filler_items_times[item]  = act / 2
 
         if not trapped_speed:
-            self.game_state_manager.set_level_speed(self.get_level_base_speed())
+            self.game_state_manager.set_level_speed(self.get_level_base_speed()* self.speed_multiplier)
         else:
             if actual_speed != target_speed:
-                self.game_state_manager.set_level_speed(target_speed)
+                self.game_state_manager.set_level_speed(target_speed+(self.speed_multiplier/2))
         for item in to_remove:
             self.filler_items_times.pop(item)
 
@@ -1037,8 +1033,8 @@ class GameController:
         self.game_missing_score = 0
         self.game_state_last_level = self.game_state_current_level
         self.game_last_score = self.game_score
-        self.deathlink_received = False
         self.ready_level = False
+        self.speed_multiplier = 1
 
 
     def reset_area(self):
@@ -1052,7 +1048,7 @@ class GameController:
         self.game_state_manager.set_lives(self.check_progressive_lives())
         self.last_live = self.check_progressive_lives()
         self.lost_a_live = False
-        self.deathlink_received = False
+        self.speed_multiplier = 1
 
     def get_level_base_speed(self)-> float:
         base_speed: float = 0.5
