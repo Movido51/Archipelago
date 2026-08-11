@@ -64,6 +64,7 @@ class GameController:
 
     game_total_combo:int = 0
     game_chains: int = 0
+    last_death_message: str = ""
 
     game_missing_score: int = 0
     game_last_score:int = 0
@@ -617,6 +618,7 @@ class GameController:
 
 
         if self.game_state_in_level != ZumaDeluxeInLevel.LEVEL:
+            self.death_has_come = False
             return
         if SectionState.Unlocked not in self.check_difficulty_state() and SectionState.GoalUnlocked not in self.check_difficulty_state():
             return

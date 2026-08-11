@@ -1,21 +1,43 @@
 from __future__ import annotations
 
+import io
+import pkgutil
 from typing import List
+
+from kivy.core.image import Image as CoreImage
 
 from kivy.clock import Clock
 from kivy.core.window import Window
+from kivy.graphics import StencilPush, Ellipse, StencilUse, StencilUnUse, StencilPop
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
+from kivy.uix.image import Image
 
+import CommonClient
 from ..gameControl.enums import ZumaDeluxeMode
 from ..gameControl.game_controller import SectionState
 from .client import ZumaDeluxeContext
+from . import client_gui
 
+def load_texture(image_path: str):
+    image_bytes = pkgutil.get_data(
+        client_gui.__name__,
+        image_path
+    )
 
+    if image_bytes is None:
+        raise FileNotFoundError(
+            f"No se encontró el recurso: {image_path}"
+        )
+
+    return CoreImage(
+        io.BytesIO(image_bytes),
+        ext="png"
+    ).texture
 
 class CheatLocation(BoxLayout):
     ctx: ZumaDeluxeContext
@@ -806,11 +828,136 @@ class ZumaDeluxeContent(BoxLayout):
                 f.write(traceback.format_exc() + "\n\n")
 #float messages
 
+class Mask(FloatLayout):
+
+    mask_size_hint: float
+    mask : Ellipse
+
+    def __init__(self, mask_size_hint=0.5, **kwargs):
+        super().__init__(**kwargs)
+
+        self.mask_size_hint = mask_size_hint
+
+        with self.canvas.before:
+            StencilPush()
+
+            self.mask = Ellipse()
+
+            StencilUse()
+
+        with self.canvas.after:
+            StencilUnUse()
+            StencilPop()
+
+        Clock.schedule_once(self.create_mask, 0)
+
+    def create_mask(self, dt):
+        diameter = min(self.width, self.height) * self.mask_size_hint
+
+        self.mask.size = (diameter, diameter)
+
+        self.mask.pos = (
+            self.center_x - diameter / 2,
+            self.center_y - diameter / 2
+        )
+
+class DeathlinkLayout(FloatLayout):
+    ctx: ZumaDeluxeContext
+    skull: Mask
+    ring: Image
+    head: Image
+    chin: Image
+    timing: Label
+    timer: Clock
+
+    def __init__(self, ctx :ZumaDeluxeContext) -> None:
+        super().__init__(
+        )
+        self.ctx = ctx
+        self.skull = FloatLayout(
+            size_hint=(0.75, 0.75),
+            pos_hint={"center_x": 0.5, "center_y": 0.5}
+        )
+        self.ring = Image(
+            texture=load_texture("assets/deathlink/ring.png"),
+            size_hint=(0.75, 0.75),
+            pos_hint={"center_x": 0.5, "center_y": 0.5}
+        )
+
+        self.head = Image(
+            texture=load_texture("assets/deathlink/head.png"),
+
+        )
+
+        self.chin = Image(
+            texture=load_texture("assets/deathlink/chin.png"),
+
+
+        )
+
+        self.timing = Label(
+            text="",
+            size_hint=(1, None),
+            height=40,
+            pos_hint={"top": 1},
+            color = (0, 0, 0, 1),
+            outline_color = (1, 1, 1, 1),
+            outline_width = 2,
+        )
+        self.skull.pos = self.ring.pos
+        self.skull.size = self.ring.size
+
+        self.skull.add_widget(self.head)
+        self.skull.add_widget(self.chin)
+
+        self.add_widget(self.skull)
+        self.add_widget(self.ring)
+        self.add_widget(self.timing)
+        self.skull.opacity = 0
+        self.ring.opacity = 0
+        self.timing.opacity = 0
+
+        self.timer = Clock.schedule_interval(self.update, 1 / 10)
+
+    def update(self, dt)->None:
+        try:
+
+            timer = self.ctx.game_controller.speed_multiplier
+            if self.ctx.game_controller.death_has_come and timer > 1:
+                self.skull.opacity = 0.5
+                self.ring.opacity = 0.5
+                self.timing.opacity = 0.5
+
+                timer = self.ctx.game_controller.speed_multiplier
+                message = self.ctx.game_controller.last_death_message
+
+                self.timing.text = f"{timer-1}"
+                separate: int  = int(timer // 3)
+                self.move_mouth(separate)
+            else:
+                self.skull.opacity = 0
+                self.ring.opacity = 0
+                self.timing.opacity = 0
+        except Exception:
+            import traceback
+
+            with open("zuma_deluxe_errors.log", "a") as f:
+                f.write(traceback.format_exc() + "\n\n")
+
+    def move_mouth(self, separate: int):
+        if separate > 6:
+            separate = 10
+        self.head.y = self.height * 0.01 * separate
+        self.chin.y = - self.height * 0.01 * separate
+
+
 
 
 class ZumaDeluxeFloatBase(FloatLayout):
     ctx: ZumaDeluxeContext
     main_layout: ZumaDeluxeContent
+    messages: BoxLayout
+    death_linker: DeathlinkLayout
 
 
     def __init__(self, ctx :ZumaDeluxeContext) -> None:
@@ -819,8 +966,11 @@ class ZumaDeluxeFloatBase(FloatLayout):
             pos_hint={"x": 0, "y": 0}
         )
         self.ctx = ctx
-        main_layout = ZumaDeluxeContent(ctx=ctx,float_manager= self)
-        self.add_widget(main_layout)
+        self.main_layout = ZumaDeluxeContent(ctx=ctx,float_manager= self)
+        self.add_widget(self.main_layout)
+        self.death_linker = DeathlinkLayout(ctx=ctx)
+        self.add_widget(self.death_linker)
+
 
 
 class ZumaDeluxeTabLayout(BoxLayout):
