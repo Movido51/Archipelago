@@ -406,6 +406,8 @@ class GameController:
                     self.game_state_last_level = self.game_state_current_level
                     self.game_last_score = self.game_score
                     self.ready_level = False
+                    self.speed_multiplier = 1
+                    self.death_has_come = False
                     ### gauntlet changing level
 
 

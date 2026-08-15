@@ -22,16 +22,17 @@ from ..gameControl.enums import *
 class ZumaDeluxeCommandProcessor(CommonClient.ClientCommandProcessor):
     ctx: "ZumaDeluxeContext"
 
-    def _cmd_deathlink(self):
+    async def _cmd_deathlink(self):
         """If your Death Link setting is set to "Toggle", use this command to turn Death Link on and off."""
         if self.ctx.game_controller.deathlink_option is not None:
             if self.ctx.game_controller.deathlink_option  == 1:
                 if self.ctx.game_controller.deathlink:
-                    self.ctx.game_controller.death_link = False
+                    self.ctx.game_controller.deathlink = False
                     self.output(f"Death Link turned off")
                 else:
-                    self.ctx.game_controller.death_link = True
+                    self.ctx.game_controller.deathlink = True
                     self.output(f"Death Link turned on")
+
 
             else:
                 self.output(f"'death_link' is not set to 'toggle' for this seed.")
@@ -215,8 +216,7 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
             now = time.perf_counter()
             dt = now - last_time
             last_time = now
-            if self.game_controller.deathlink is None:
-                self.game_controller.deathlink = False
+
             if  self.game_controller.deathlink != ("DeathLink" in self.tags):
                 await self.update_death_link(self.game_controller.deathlink)
 
