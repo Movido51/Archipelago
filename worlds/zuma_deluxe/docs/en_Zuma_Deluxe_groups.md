@@ -17,7 +17,7 @@ Also useful traps and filler all belong to this Group:
 - EXTRA ITEM
 
 Both progressive and extra live belong to this Group:
-- LIVE ITEM
+- LIFE ITEM
 
 Now Items that have direct connection to a level belong to some groups.
 Depending on what mode the level belongs:

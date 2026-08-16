@@ -30,7 +30,7 @@ class GameState(NamedTuple):
     level_speed: float = 0
     actual_time: int = 0
     ace_time_bool: bool = False
-    actual_live: int = -1
+    actual_life: int = -1
 
 
 
@@ -571,7 +571,7 @@ class GameStateManager:
             max_combo=self.get_max_combo(),
             level_speed=self.get_level_speed(),
             ace_time_bool=self.got_ace_time(),
-            actual_live= self.get_lives()
+            actual_life= self.get_lives()
 
         )
 

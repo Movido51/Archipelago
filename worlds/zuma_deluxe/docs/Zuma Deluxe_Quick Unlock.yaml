@@ -149,7 +149,7 @@ Zuma Deluxe:
     random-range-1-100: 0 # random value between 1 and 100
 
   death_link:
-    # When you lose a live or get game over, the other player will also die.
+    # When you lose a life or get game over, the other player will also die.
     # the opposite is also true.
     'off': 50
     toggle: 0

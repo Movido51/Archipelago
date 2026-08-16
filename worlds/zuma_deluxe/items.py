@@ -59,7 +59,7 @@ def create_all_items(world: ZumaDeluxe) ->None:
     for item in item_data_classification:
         name = item["name"]
         amount:int  = 1
-        if name  == "Progressive Lives":
+        if name  == "Progressive Life":
             amount = world.maximum_lives
         if name == "Progressive Difficulty":
             if world.mode != ZumaDeluxeMode.ADVENTURE:

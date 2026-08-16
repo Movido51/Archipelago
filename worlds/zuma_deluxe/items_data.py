@@ -62,7 +62,7 @@ sub_item_data: List[SubItemDict] =[
 
 item_data_classification: List[ItemClass] =[
     ItemClass(
-        name = "Progressive Live",
+        name = "Progressive Life",
         classification = ItemClassification.useful
     ),
     ItemClass(
@@ -92,8 +92,8 @@ extra_items: Dict[str,FillerDict] = {
         classification=ItemClassification.filler,
         duration = 0.5
     ),
-    "Extra Live": FillerDict(
-        name = "Extra Live",
+    "Extra Life": FillerDict(
+        name = "Extra Life",
         classification=ItemClassification.useful,
         duration = 0.5
     ),
@@ -143,12 +143,12 @@ extra_items: Dict[str,FillerDict] = {
 
 items_data: List[ItemDict] = [
 	ItemDict(
-		name="Progressive Live",
-		groups=["PROGRESSIVE ITEM","LIVE ITEM"],
+		name="Progressive Life",
+		groups=["PROGRESSIVE ITEM","LIFE ITEM"],
 		id=1
 	),	ItemDict(
-		name="Extra Live",
-		groups=["EXTRA ITEM","USEFUL ITEM","LIVE ITEM"],
+		name="Extra Life",
+		groups=["EXTRA ITEM","USEFUL ITEM","LIFE ITEM"],
 		id=2
 	),	ItemDict(
 		name="Progressive Difficulty",

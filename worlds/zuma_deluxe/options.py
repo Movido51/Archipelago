@@ -264,7 +264,7 @@ class MaximumStartingLives(Range):
 
 class DeathLink(Choice):
     """
-    When you lose a live or get game over, the other player will also die.
+    When you lose a life or get game over, the other player will also die.
     the opposite is also true.
     """
     display_name = "Death Link"

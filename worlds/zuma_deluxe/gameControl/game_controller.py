@@ -7,6 +7,7 @@ import enum
 
 import math
 
+from items_data import items_names_to_ids
 from worlds.cv64 import filler_item_names
 from .enums import (
     ZumaDeluxeGameState,
@@ -151,8 +152,8 @@ class GameController:
     checked_clear: bool
     death_has_come:bool
     send_death:bool
-    last_live: int
-    lost_a_live: bool
+    last_life: int
+    lost_a_life: bool
 
 
     def __init__(self, logger: logging.Logger = None) -> None:
@@ -233,8 +234,8 @@ class GameController:
 
         self.death_has_come = False
         self.send_death = False
-        self.last_live = -1
-        self.lost_a_live = False
+        self.last_life = -1
+        self.lost_a_life = False
 
 
     def log(self, message)->None:
@@ -312,13 +313,13 @@ class GameController:
         self.moved_up = False
         self.check_goal_level_clear = -1
 
-        if game_state.actual_live == -1:
-            self.last_live = game_state.actual_live
-        if self.last_live > game_state.actual_live:
-            self.lost_a_live = True
+        if game_state.actual_life == -1:
+            self.last_life = game_state.actual_life
+        if self.last_life > game_state.actual_life:
+            self.lost_a_life = True
         else:
-            self.lost_a_live = False
-        self.last_live = game_state.actual_live
+            self.lost_a_life = False
+        self.last_life = game_state.actual_life
 
     def _apply_conditional_game_state(self)->None:
         if not self.game_state_manager.are_all_temples_unlocked():
@@ -632,13 +633,13 @@ class GameController:
         else:
             if not self.death_has_come:
 
-                if self.game_state_current_game_state == ZumaDeluxeGameState.GAME_OVER or self.lost_a_live:
+                if self.game_state_current_game_state == ZumaDeluxeGameState.GAME_OVER or self.lost_a_life:
                     self.send_death = True
                     self.death_has_come = True
             else:
                 if self.game_state_current_game_state == ZumaDeluxeGameState.PLAYING:
                     self.death_has_come = False
-        if self.game_state_current_game_state == ZumaDeluxeGameState.GAME_OVER or self.lost_a_live:
+        if self.game_state_current_game_state == ZumaDeluxeGameState.GAME_OVER or self.lost_a_life:
             self.reset_level()
 
 
@@ -762,7 +763,7 @@ class GameController:
                                     self.gauntlet_selection[board].append(SectionState.GoalIncomplete)
                             continue
 
-            if item in "Progressive Lives" and self.game_state_in_level == ZumaDeluxeInLevel.LEVEL:
+            if item in "Progressive Life" and self.game_state_in_level == ZumaDeluxeInLevel.LEVEL:
                 self.game_state_manager.add_lives(1)
 
             if item in extra_items:
@@ -809,7 +810,7 @@ class GameController:
                 match item:
                     case "Happy Sun":
                         self.game_state_manager.add_to_score(10)
-                    case "Extra Live":
+                    case "Extra Life":
                         self.game_state_manager.add_lives(1)
                     case "Combo Killer":
                         self.game_last_actual_combo = 0
@@ -1018,6 +1019,9 @@ class GameController:
 
 
     def check_item(self, name: str)->int:
+        if name not in items_names_to_ids:
+            if self.logger is not None:
+                self.logger.warning(f"{name} not in items pool")
         if name not in self.received_items:
             self.received_items[name] = 0
         return  self.received_items[name]
@@ -1026,7 +1030,7 @@ class GameController:
 
     def check_progressive_lives(self)->int:
 
-        return self.check_item("Progressive Lives")+1
+        return self.check_item("Progressive Life")+1
 
     def reset_level(self):
         self.game_last_balls = 0
@@ -1050,8 +1054,8 @@ class GameController:
         self.game_last_difficulty = self.game_difficulty
         self.game_area_max_combo = 0
         self.game_state_manager.set_lives(self.check_progressive_lives())
-        self.last_live = self.check_progressive_lives()
-        self.lost_a_live = False
+        self.last_life = self.check_progressive_lives()
+        self.lost_a_life = False
         self.speed_multiplier = 1
 
     def get_level_base_speed(self)-> float:
