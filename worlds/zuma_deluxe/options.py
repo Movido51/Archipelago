@@ -1,14 +1,12 @@
 from dataclasses import dataclass
-from itertools import chain
 
-from Options import Choice, OptionGroup, PerGameCommonOptions, Range, Toggle, DefaultOnToggle, OptionDict
+from schema import Schema
+
+from Options import Choice, OptionGroup, PerGameCommonOptions, Range, Toggle, DefaultOnToggle, OptionDict, OptionCounter
 
 from .gameControl.enums import (
     ZumaDeluxeBoards,
     ZumaDeluxeStages,
-    ZumaDeluxeGauntletDifficulties
-
-
 )
 ## game and goal setup
 
@@ -179,7 +177,7 @@ class Chain(Range):
 
 ### gauntlet options
 
-class GauntletLevels(OptionDict):
+class GauntletLevels(OptionCounter):
     """
     Determines which Boards from Gauntlet can be considered for inclusion in the multiworld.
 
@@ -190,6 +188,8 @@ class GauntletLevels(OptionDict):
     If space is selected as goal but not here, only clearing the goal will be the only check in space
     """
     display_name = " Gauntlet Level Selection"
+    supports_weighting = True
+    
 
     valid_keys = {level.value: True for level in list(ZumaDeluxeBoards)[:-1]}
 
@@ -217,7 +217,7 @@ class GauntletDifficulty(Choice):
 
 ## Adventure Options
 
-class AdventureLevels(OptionDict):
+class AdventureLevels(OptionCounter):
     """
     Determines which stages from adventure can be considered for inclusion in the multiworld.
 
@@ -226,6 +226,42 @@ class AdventureLevels(OptionDict):
     A minimum of 4 Levels must be selected to play.
     """
     display_name = "Adventure Level Selection"
+    valid_keys = {level.value: True for level in list(ZumaDeluxeStages)[:-1]}
+    schema = Schema({
+        "Vanilla Minigame": int,
+        "Seeker Minigame": int,
+        "Button Galore Minigame": int,
+        "OG Randomizer Minigame": int,
+        "Block Brawl Minigame": int,
+        "Climb Line Minigame": int,
+        "Climb Spiral Minigame": int,
+        "Climb Chaos Minigame": int,
+        "Climb Narrow Minigame": int,
+        "Block Blub Minigame": int,
+        "Refunct Mountain Minigame": int,
+        "Rando Mountain Minigame": int,
+        "Funny Bridge Game Minigame": int,
+        "Clique": int,
+        "Custom Minigame": int,
+    })
+    min = 0
+    default = {
+        "Vanilla Minigame": 2,
+        "Seeker Minigame": 2,
+        "Button Galore Minigame": 2,
+        "OG Randomizer Minigame": 5,
+        "Block Brawl Minigame": 5,
+        "Climb Line Minigame": 1,
+        "Climb Spiral Minigame": 1,
+        "Climb Chaos Minigame": 1,
+        "Climb Narrow Minigame": 1,
+        "Block Blub Minigame": 2,
+        "Refunct Mountain Minigame": 2,
+        "Rando Mountain Minigame": 5,
+        "Funny Bridge Game Minigame": 1,
+        "Clique": 1,
+        "Custom Minigame": 1,
+    }
 
     valid_keys = {level.value: True for level in list(ZumaDeluxeStages)[:-1]}
 

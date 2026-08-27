@@ -120,7 +120,7 @@ class ZumaDeluxe(World):
         if self.sun_idols_required_option >= self.sun_idols_helpers_option:
             self.sun_idols_helpers = self.sun_idols_required+1
             logging.warning(
-                f"Zuma Deluxe: {self.player_name} has more required sun idols than total sun idols. "
+                f"Zuma Deluxe: {self.player_name} has assigned a lower threshold for helpers sun idol than required sun idols. "
                 "Adjusting required sun idols to match total sun idols..."
             )
 

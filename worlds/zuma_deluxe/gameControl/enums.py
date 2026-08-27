@@ -40,7 +40,7 @@ class ZumaDeluxeBoards(enum.Enum):
     SP_12 = "Board 12 - Snake Pit"
     SG_13 = "Board 13 - Sand Garden"
     LoTMS_14 = "Board 14 - Lair of The Mud Snake"
-    LDP_15 = "Board 15 - Lan Ding Pad"
+    LDP_15 = "Board 15 - Landing Pad"
     AoT_16 = "Board 16 - Altar of Tlaloc"
     CoM_17 = "Board 17 - Code of Mixtec"
     SoQ_18 = "Board 18 - Shrine of Quetzalcoatl"

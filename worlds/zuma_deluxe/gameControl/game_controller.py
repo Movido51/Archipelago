@@ -7,8 +7,7 @@ import enum
 
 import math
 
-from items_data import items_names_to_ids
-from worlds.cv64 import filler_item_names
+import CommonClient
 from .enums import (
     ZumaDeluxeGameState,
     ZumaDeluxeInLevel,
@@ -19,7 +18,7 @@ from .enums import (
     ZumaDeluxeMode
 )
 
-from ..items_data import extra_items, Group
+from ..items_data import extra_items, items_names_to_ids
 
 from .game_state_manager import GameStateManager, GameState
 
@@ -255,6 +254,7 @@ class GameController:
     def is_process_running(self)->bool:
         return self.game_state_manager.is_process_still_running()
 
+
     def update(self, dt:float):
         if self.game_state_manager.is_process_still_running():
             try:
@@ -272,11 +272,7 @@ class GameController:
 
                 #
 
-                #
-                # self._check_for_completed_locations()
-                # self._process_received_items()
-                #
-                # self._check_for_victory()w
+
             except Exception:
                 import traceback
 
@@ -726,7 +722,7 @@ class GameController:
         while len(self.received_items_queue) > 0:
 
             item: str = self.received_items_queue.popleft()
-            print(item)
+
 
             if item not in self.received_items:
                 self.received_items[item] = 0
@@ -1054,7 +1050,7 @@ class GameController:
         self.game_last_difficulty = self.game_difficulty
         self.game_area_max_combo = 0
         self.game_state_manager.set_lives(self.check_progressive_lives())
-        self.last_life = self.check_progressive_lives()
+        self.last_life = -1
         self.lost_a_life = False
         self.speed_multiplier = 1
 

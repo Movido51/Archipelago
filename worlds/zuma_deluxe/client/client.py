@@ -193,6 +193,7 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
                     }
                 ])
             )
+            CommonClient.logger.info("paquete recibido")
 
             # UI Tabs
             self.ui.update_tabs()
@@ -230,7 +231,7 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
                     continue
 
                 item: str = self.items_ids_to_names[network_item.item]
-
+                #CommonClient.logger.info(f"{item} recibido")
                 self.game_controller.received_items_queue.append(item)
                 self.seen_item_indices.add(i)
 

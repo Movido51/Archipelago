@@ -475,24 +475,24 @@ items_data: List[ItemDict] = [
 		groups=["LAIR OF THE MUD SNAKE ITEM","GAUNTLET ITEM","UNLOCK ITEM","GAUNTLET UNLOCK ITEM","PROGRESSIVE ITEM"],
 		id=33909
 	),	ItemDict(
-		name="Lan Ding Pad (Coin Points)",
-		groups=["LAN DING PAD ITEM","GAUNTLET ITEM","POINTS ITEM","GAUNTLET POINTS ITEM","COIN POINTS ITEM"],
+		name="Landing Pad (Coin Points)",
+		groups=["LANDING PAD ITEM","GAUNTLET ITEM","POINTS ITEM","GAUNTLET POINTS ITEM","COIN POINTS ITEM"],
 		id=36501
 	),	ItemDict(
-		name="Lan Ding Pad (Gap Points)",
-		groups=["LAN DING PAD ITEM","GAUNTLET ITEM","POINTS ITEM","GAUNTLET POINTS ITEM","GAP POINTS ITEM"],
+		name="Landing Pad (Gap Points)",
+		groups=["LANDING PAD ITEM","GAUNTLET ITEM","POINTS ITEM","GAUNTLET POINTS ITEM","GAP POINTS ITEM"],
 		id=36502
 	),	ItemDict(
-		name="Lan Ding Pad (Combo Points)",
-		groups=["LAN DING PAD ITEM","GAUNTLET ITEM","POINTS ITEM","GAUNTLET POINTS ITEM","COMBO POINTS ITEM"],
+		name="Landing Pad (Combo Points)",
+		groups=["LANDING PAD ITEM","GAUNTLET ITEM","POINTS ITEM","GAUNTLET POINTS ITEM","COMBO POINTS ITEM"],
 		id=36503
 	),	ItemDict(
-		name="Lan Ding Pad (Chain Points)",
-		groups=["LAN DING PAD ITEM","GAUNTLET ITEM","POINTS ITEM","GAUNTLET POINTS ITEM","CHAIN POINTS ITEM"],
+		name="Landing Pad (Chain Points)",
+		groups=["LANDING PAD ITEM","GAUNTLET ITEM","POINTS ITEM","GAUNTLET POINTS ITEM","CHAIN POINTS ITEM"],
 		id=36504
 	),	ItemDict(
-		name="Board Unlock: Lan Ding Pad",
-		groups=["LAN DING PAD ITEM","GAUNTLET ITEM","UNLOCK ITEM","GAUNTLET UNLOCK ITEM","PROGRESSIVE ITEM"],
+		name="Board Unlock: Landing Pad",
+		groups=["LANDING PAD ITEM","GAUNTLET ITEM","UNLOCK ITEM","GAUNTLET UNLOCK ITEM","PROGRESSIVE ITEM"],
 		id=36509
 	),	ItemDict(
 		name="Altar of Tlaloc (Coin Points)",
