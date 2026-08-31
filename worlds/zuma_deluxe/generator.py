@@ -15,11 +15,16 @@ if TYPE_CHECKING:
 def pre_generate_gauntlet_levels(world: ZumaDeluxe) -> None:
     board_pool : List[ZumaDeluxeBoards] = list()
     minimum_boards: int = world.options.gauntlet_amount.range_start
-    board_name : str
-    is_selected: bool
-    for board_name,is_selected in world.options.gauntlet_levels.value.items():
-        if is_selected:
-            board_pool.append(ZumaDeluxeBoards(board_name))
+    board_weights = world.options.gauntlet_levels.value
+    population = list(board_weights.keys())
+    weights = list(board_weights.values())
+    k = min(world.gauntlet_amount, len([w for w in weights if w > 0]))
+    for _ in range(k):
+        choice = world.multiworld.random.choices(population=population, weights=weights, k=1)[0]
+        idx = population.index(choice)
+        board_pool.append(ZumaDeluxeBoards(choice))
+        population.pop(idx)
+        weights.pop(idx)
     board_pool = list(sorted(board_pool, key=lambda m: m.value))
 
     if len(board_pool) < minimum_boards:
@@ -59,17 +64,21 @@ def pre_generate_gauntlet_levels(world: ZumaDeluxe) -> None:
             world.selected_starter_gauntlet = None
     else:
         world.selected_starter_gauntlet = board_pool[0]
-
+    print(board_pool)
 
 def pre_generate_adventure_levels(world: ZumaDeluxe) -> None:
-    stage_pool: List[ZumaDeluxeStages] = list()
-
-    minimum_stages: int = world.options.adventure_amount.range_start
-    stage_name: str
-    is_selected: bool
-    for stage_name, is_selected in world.options.adventure_levels.value.items():
-        if is_selected:
-            stage_pool.append(ZumaDeluxeStages(stage_name))
+    stage_pool: List[ZumaDeluxeBoards] = list()
+    minimum_stages: int = world.options.gauntlet_amount.range_start
+    stage_weights = world.options.adventure_levels.value
+    population = list(stage_weights.keys())
+    weights = list(stage_weights.values())
+    k = min(world.adventure_amount, len([w for w in weights if w > 0]))
+    for _ in range(k):
+        choice = world.multiworld.random.choices(population=population, weights=weights, k=1)[0]
+        idx = population.index(choice)
+        stage_pool.append(ZumaDeluxeStages(choice))
+        population.pop(idx)
+        weights.pop(idx)
 
     stage_pool = list(sorted(stage_pool, key=lambda m: m.value))
 

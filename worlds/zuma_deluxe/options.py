@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 
-from schema import Schema
 
-from Options import Choice, OptionGroup, PerGameCommonOptions, Range, Toggle, DefaultOnToggle, OptionDict, OptionCounter
+from Options import Choice, OptionGroup, PerGameCommonOptions, Range, Toggle, DefaultOnToggle, OptionCounter
 
 from .gameControl.enums import (
     ZumaDeluxeBoards,
@@ -21,7 +20,7 @@ class GameMode(Choice):
     option_adventure = 0
     option_gauntlet = 1
     option_explorer = 2
-    default = option_explorer
+    default = option_adventure
 
 
 class Goal(Choice):
@@ -106,7 +105,7 @@ class SunIdolHelpers(Range):
 
 class AceTime(Toggle):
     """
-    Add the Ace-Time of each level as locations.
+    Add the Ace Time of each level as locations.
     """
     display_name = "Ace Time"
 
@@ -188,12 +187,12 @@ class GauntletLevels(OptionCounter):
     If space is selected as goal but not here, only clearing the goal will be the only check in space
     """
     display_name = " Gauntlet Level Selection"
-    supports_weighting = True
+    #supports_weighting = True
     
+    min = 0
+    valid_keys = {level.value for level in list(ZumaDeluxeBoards)[:-1]}
 
-    valid_keys = {level.value: True for level in list(ZumaDeluxeBoards)[:-1]}
-
-    default = valid_keys
+    default = {valid_key: 5 for valid_key in valid_keys}
 
 class GauntletLevelAmount(Range):
     """
@@ -225,47 +224,23 @@ class AdventureLevels(OptionCounter):
 
     A minimum of 4 Levels must be selected to play.
     """
-    display_name = "Adventure Level Selection"
-    valid_keys = {level.value: True for level in list(ZumaDeluxeStages)[:-1]}
-    schema = Schema({
-        "Vanilla Minigame": int,
-        "Seeker Minigame": int,
-        "Button Galore Minigame": int,
-        "OG Randomizer Minigame": int,
-        "Block Brawl Minigame": int,
-        "Climb Line Minigame": int,
-        "Climb Spiral Minigame": int,
-        "Climb Chaos Minigame": int,
-        "Climb Narrow Minigame": int,
-        "Block Blub Minigame": int,
-        "Refunct Mountain Minigame": int,
-        "Rando Mountain Minigame": int,
-        "Funny Bridge Game Minigame": int,
-        "Clique": int,
-        "Custom Minigame": int,
-    })
     min = 0
+    display_name = "Adventure Level Selection"
+    valid_keys = {level.value for level in list(ZumaDeluxeStages)[:-1]}
     default = {
-        "Vanilla Minigame": 2,
-        "Seeker Minigame": 2,
-        "Button Galore Minigame": 2,
-        "OG Randomizer Minigame": 5,
-        "Block Brawl Minigame": 5,
-        "Climb Line Minigame": 1,
-        "Climb Spiral Minigame": 1,
-        "Climb Chaos Minigame": 1,
-        "Climb Narrow Minigame": 1,
-        "Block Blub Minigame": 2,
-        "Refunct Mountain Minigame": 2,
-        "Rando Mountain Minigame": 5,
-        "Funny Bridge Game Minigame": 1,
-        "Clique": 1,
-        "Custom Minigame": 1,
+        "Stage 1 - Temple of Zukulkan 1": 6,
+        "Stage 2 - Temple of Zukulkan 2": 6,
+        "Stage 3 - Temple of Zukulkan 3": 6,
+        "Stage 4 - Quetzal Quatl 1": 4,
+        "Stage 5 - Quetzal Quatl 2": 4,
+        "Stage 6 - Quetzal Quatl 3": 4,
+        "Stage 7 - Popo Poyolli 1": 3,
+        "Stage 8 - Popo Poyolli 2": 3,
+        "Stage 9 - Popo Poyolli 3": 3,
+        "Stage 10 - Secret Shrine Of Zuma 1": 1,
+        "Stage 11 - Secret Shrine Of Zuma 2": 1,
+        "Stage 12 - Secret Shrine Of Zuma 3" : 1,
     }
-
-    valid_keys = {level.value: True for level in list(ZumaDeluxeStages)[:-1]}
-
-    default = valid_keys
 
 
 class AdventureLevelAmount(Range):
