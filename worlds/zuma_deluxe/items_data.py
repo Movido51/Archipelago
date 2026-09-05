@@ -134,8 +134,8 @@ extra_items: Dict[str,FillerDict] = {
         duration= 10
 
     ),
-    "Skip": FillerDict(
-        name= "Skip",
+    "Progress Token": FillerDict(
+        name= "Progress Token",
         classification=ItemClassification.useful,
         duration = 0.5,
     )
@@ -191,7 +191,7 @@ items_data: List[ItemDict] = [
 		groups=["EXTRA ITEM","FILLER ITEM"],
 		id=12
 	),	ItemDict(
-		name="Skip",
+		name="Progress Token",
 		groups=["EXTRA ITEM","USEFUL ITEM"],
 		id=13
 	),	ItemDict(

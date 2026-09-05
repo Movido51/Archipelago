@@ -421,50 +421,50 @@ class LevelLocationsLayout(BoxLayout):
         self.ctx = ctx
 
         self.coins_location = Label(
-            text=f"Coins\n{self.ctx.game_controller.coins}   {self.ctx.game_controller.game_area_coins}",
+            text=f"Coins\n{self.ctx.game_controller.required_coins}   {self.ctx.game_controller.game_area_coins}",
             halign="center",
             size_hint_y=1
         )
         self.add_widget(self.coins_location)
 
         self.combo_location = Label(
-            text=f"Total Combo\n{self.ctx.game_controller.combo}   {self.ctx.game_controller.game_area_total_combo}",
+            text=f"Total Combo\n{self.ctx.game_controller.required_combo}   {self.ctx.game_controller.game_area_total_combo}",
             halign="center",
             size_hint_y=1
         )
         self.add_widget(self.combo_location)
 
         self.combo_max_location = Label(
-            text=f"Max Combo\n{self.ctx.game_controller.max_combo}   {self.ctx.game_controller.game_area_max_combo}",
+            text=f"Max Combo\n{self.ctx.game_controller.required_max_combo}   {self.ctx.game_controller.game_area_max_combo}",
             halign="center",
             size_hint_y=1
         )
         self.add_widget(self.combo_max_location)
 
         self.gaps_location = Label(
-            text=f"Gaps\n{self.ctx.game_controller.gaps}   {self.ctx.game_controller.game_area_gaps}",
+            text=f"Gaps\n{self.ctx.game_controller.required_gaps}   {self.ctx.game_controller.game_area_gaps}",
             halign="center",
             size_hint_y=1
         )
         self.add_widget(self.gaps_location)
 
         self.chain_location = Label(
-            text=f"Chains\n{self.ctx.game_controller.chain}   {self.ctx.game_controller.game_area_chains}",
+            text=f"Chains\n{self.ctx.game_controller.required_chain}   {self.ctx.game_controller.game_area_chains}",
             halign="center",
             size_hint_y=1
         )
         self.add_widget(self.chain_location)
 
     def update(self):
-        self.coins_location.text=f"Coins\n{self.ctx.game_controller.coins}   {self.ctx.game_controller.game_area_coins}"
+        self.coins_location.text=f"Coins\n{self.ctx.game_controller.required_coins}   {self.ctx.game_controller.game_area_coins}"
 
-        self.combo_location.text=f"Total Combo\n{self.ctx.game_controller.combo}   {self.ctx.game_controller.game_area_total_combo}"
+        self.combo_location.text=f"Total Combo\n{self.ctx.game_controller.required_combo}   {self.ctx.game_controller.game_area_total_combo}"
 
-        self.combo_max_location.text=f"Max Combo\n{self.ctx.game_controller.max_combo}   {self.ctx.game_controller.game_area_max_combo}"
+        self.combo_max_location.text=f"Max Combo\n{self.ctx.game_controller.required_max_combo}   {self.ctx.game_controller.game_area_max_combo}"
 
-        self.gaps_location.text=f"Gaps\n{self.ctx.game_controller.gaps}   {self.ctx.game_controller.game_area_gaps}"
+        self.gaps_location.text=f"Gaps\n{self.ctx.game_controller.required_gaps}   {self.ctx.game_controller.game_area_gaps}"
 
-        self.chain_location.text=f"Chains\n{self.ctx.game_controller.chain}   {self.ctx.game_controller.game_area_chains}"
+        self.chain_location.text=f"Chains\n{self.ctx.game_controller.required_chain}   {self.ctx.game_controller.game_area_chains}"
 
     def show(self):
         self.opacity = 1.0
@@ -686,7 +686,7 @@ class ZumaDeluxeLevelsLayout(BoxLayout):
             orientation="vertical"
         )
         self.ctx = ctx
-        mode: ZumaDeluxeMode = ZumaDeluxeMode.ADVENTURE if self.ctx.game_controller.mode is None else self.ctx.game_controller.mode
+        mode: ZumaDeluxeMode = ZumaDeluxeMode.ADVENTURE if self.ctx.game_controller.selected_mode is None else self.ctx.game_controller.selected_mode
 
         if mode == ZumaDeluxeMode.BOTH:
             self.actual_mode = ZumaDeluxeMode.ADVENTURE
@@ -874,7 +874,7 @@ class ZumaDeluxeTabLayout(BoxLayout):
         self.update()
 
     def update(self) -> None:
-        if self.ctx.game_controller.mode is None:
+        if self.ctx.game_controller.selected_mode is None:
             self.layout_not_connected.show()
 
             if hasattr(self, "layout_content_zuma_deluxe"):

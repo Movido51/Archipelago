@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Set
 
 import collections
 import logging
@@ -7,7 +7,6 @@ import enum
 
 import math
 
-import CommonClient
 from .enums import (
     ZumaDeluxeGameState,
     ZumaDeluxeInLevel,
@@ -45,9 +44,6 @@ class GameController:
 
     #options Lecture
 
-
-
-
     #Game direction state
     game_state_in_level: Optional[ZumaDeluxeInLevel]
     game_state_current_game_state: Optional[ZumaDeluxeGameState]
@@ -57,34 +53,35 @@ class GameController:
     game_state_gauntlet_board: Optional[int]
     game_state_got_ace_time: bool
 
-    game_score: int = 0
-    game_balls: int = 0
-    game_coins: int = 0
-    game_gaps: int = 0
+    game_score: int
+    game_balls: int
+    game_coins: int
+    game_gaps: int
 
-    game_total_combo:int = 0
-    game_chains: int = 0
-    last_death_message: str = ""
+    game_total_combo:int
+    game_chains: int
+    last_death_message: str
 
-    game_missing_score: int = 0
-    game_last_score:int = 0
-    game_base_score:int = 0
-    game_last_balls: int = 0
-    game_last_coins: int = 0
-    game_last_gaps: int = 0
-    game_last_actual_combo:int = 0
-    game_last_total_combo:int = 0
-    game_last_chains:int = 0
-
-    game_area_coins:int = 0
-    game_area_total_combo:int = 0
-    game_area_chains:int = 0
-    game_area_gaps:int = 0
-    game_area_max_combo = 0
+    game_missing_score: int
+    game_last_score:int
+    game_base_score:int
+    game_last_balls: int
+    game_last_coins: int
+    game_last_gaps: int
+    game_last_actual_combo:int
+    game_last_total_combo:int
+    game_last_chains:int
 
 
+    game_area_coins:int
+    game_area_total_combo:int
+    game_area_chains:int
+    game_area_gaps:int
+    game_area_max_combo:int
 
-    last_game_state_gauntlet_board: int = 0
+
+
+    last_game_state_gauntlet_board: int
     game_difficulty: ZumaDeluxeGauntletDifficulties
 
     #Game Front data
@@ -95,7 +92,7 @@ class GameController:
     game_last_section: None | ZumaDeluxeBoards | ZumaDeluxeStages
     game_action_list: collections.deque
     moved_up: bool
-
+    starting_level = -1
 
     game_actual_level: str = ""
     game_actual_area: str = ""
@@ -106,26 +103,26 @@ class GameController:
     #Generation options
 
 
-    goal: Optional[ZumaDeluxeAPGoals]
-    goal_mode: Optional[ZumaDeluxeMode]
-    mode: Optional[ZumaDeluxeMode]
+    selected_goal: Optional[ZumaDeluxeAPGoals]
+    selected_goal_mode: Optional[ZumaDeluxeMode]
+    selected_mode: Optional[ZumaDeluxeMode]
     sun_idols_required: Optional[int]
-    max_combo: Optional[int]
-    chain: Optional[int]
     sun_idols_helpers: Optional[int]
     sun_idols_total: Optional[int]
 
     include_ace_time: Optional[bool]
-    coins: Optional[int]
-    gaps: Optional[int]
-    combo: Optional[int]
+    required_coins: Optional[int]
+    required_gaps: Optional[int]
+    required_combo: Optional[int]
+    required_max_combo: Optional[int]
+    required_chain: Optional[int]
 
     target_ratios: Optional[int]
 
     maximum_lives: Optional[int]
 
     deathlink_option = Optional[int]
-    deathlink: bool
+    deathlink_active: bool
 
     level_speed: float
 
@@ -153,7 +150,8 @@ class GameController:
     send_death:bool
     last_life: int
     lost_a_life: bool
-
+    speed_multiplier: float = 1
+    ready_level = False
 
     def __init__(self, logger: logging.Logger = None) -> None:
         self.logger = logger
@@ -186,23 +184,24 @@ class GameController:
         self.game_last_section = None
         self.game_action_list = collections.deque()
         self.moved_up = False
-        self.game_state_last_level = 0
+        self.game_state_last_level = None
+        self.starting_level = -1
         self.level_speed = 0.0
 
         #Generation Options
-        self.goal = None
-        self.goal_mode  = None
-        self.mode  = None
+        self.selected_goal = None
+        self.selected_goal_mode  = None
+        self.selected_mode  = None
         self.sun_idols_required  = None
         self.sun_idols_helpers  = None
         self.sun_idols_total  = None
 
         self.include_ace_time  = None
-        self.coins  = None
-        self.gaps  = None
-        self.combo  = None
-        self.max_combo  = None
-        self.chain = None
+        self.required_coins  = None
+        self.required_gaps  = None
+        self.required_combo  = None
+        self.required_max_combo  = None
+        self.required_chain = None
 
         self.target_ratios = None
 
@@ -214,9 +213,9 @@ class GameController:
         self.adventure_amount = None
         self.maximum_lives = None
         self.deathlink_option = None
-        self.deathlink = False
+        self.deathlink_active = False
         self.checked_clear = False
-        self.check_goal_level_clear = 0
+        self.check_goal_level_clear = -1
 
         # # Generation Data
 
@@ -235,6 +234,31 @@ class GameController:
         self.send_death = False
         self.last_life = -1
         self.lost_a_life = False
+
+        self.game_score = -1
+        self.game_balls = -1
+        self.game_coins = -1
+        self.game_gaps = -1
+
+        self.game_total_combo = -1
+        self.game_chains = -1
+        self.last_death_message = ""
+
+        self.game_missing_score = -1
+        self.game_last_score = -1
+        self.game_base_score = -1
+        self.game_last_balls = -1
+        self.game_last_coins = -1
+        self.game_last_gaps = -1
+        self.game_last_actual_combo = -1
+        self.game_last_total_combo = -1
+        self.game_last_chains = -1
+
+        self.game_area_coins = -1
+        self.game_area_total_combo = -1
+        self.game_area_chains = -1
+        self.game_area_gaps = -1
+        self.game_area_max_combo = -1
 
 
     def log(self, message)->None:
@@ -280,10 +304,12 @@ class GameController:
                     f.write(traceback.format_exc() + "\n\n")
 
     def _refresh_game_state(self)->None:
+        """
+        receives game data
+        """
         game_state: GameState = self.game_state_manager.get_game_state()
 
         self.game_state_in_level = game_state.playing
-
         self.game_state_current_game_state  = game_state.game_state_in_game
 
         if game_state.current_level is not None and self.game_state_current_game_state == ZumaDeluxeGameState.PLAYING:
@@ -295,8 +321,7 @@ class GameController:
 
         self.game_base_score = game_state.base_score
         self.game_score = game_state.actual_score
-        if self.game_last_score < game_state.base_score:
-            self.game_last_score = game_state.base_score
+        self.game_target_score = game_state.target_score
         self.game_balls = game_state.destroyed_balls
         self.game_coins = game_state.coins
         self.game_gaps = game_state.gaps
@@ -318,27 +343,54 @@ class GameController:
         self.last_life = game_state.actual_life
 
     def _apply_conditional_game_state(self)->None:
+
+        """
+        unlocks levels for the game
+        """
         if not self.game_state_manager.are_all_temples_unlocked():
             self.game_state_manager.unlock_all_temples()
 
-
+    def _playing_level(self)->bool:
+        return self.game_state_current_game_state == ZumaDeluxeGameState.PLAYING or self.game_state_current_game_state == ZumaDeluxeGameState.DANGER
 
     def back_setup(self)->None:
 
+        """
+        transform data into usable info
+        getting in and out levels and passing a level to other
+        """
+        if self.game_state_current_game_state == ZumaDeluxeGameState.MAIN_MENU:
+            self.restart_by_menu()
+            return
+        #if self.ready_level and not self._playing_level():
+         #   self.ready_level = False
+
+        if self.game_state_current_game_state == ZumaDeluxeGameState.ADVENTURE_MENU:
+            self.game_state_current_game_mode = ZumaDeluxeMode.ADVENTURE
+            self.ready_level = False
+
+        if self.game_state_current_game_state == ZumaDeluxeGameState.GAUNTLET_MENU:
+            self.game_state_current_game_mode = ZumaDeluxeMode.GAUNTLET
+            if self.game_state_gauntlet_board is not None and not (self.game_state_gauntlet_board == -1):
+                self.last_game_state_gauntlet_board = self.game_state_gauntlet_board
+            self.ready_level = False
+
+
         if self.game_state_in_level == ZumaDeluxeInLevel.LEVEL:
+            #extra set mode before
+            if self.game_state_current_game_mode is None and self.game_score == 0:
+                if self.game_state_current_gauntlet_level != 0:
+                    self.game_state_current_game_mode = ZumaDeluxeMode.GAUNTLET
+                elif self.game_state_current_level != 0:
+                    self.game_state_current_game_mode = ZumaDeluxeMode.ADVENTURE
+            #no mode
             if self.game_state_current_game_mode is None:
                 return
 
-
-            if self.game_state_current_gauntlet_level != 0:
-                self.game_state_current_game_mode = ZumaDeluxeMode.GAUNTLET
             if self.game_state_current_game_mode == ZumaDeluxeMode.ADVENTURE:
-
-                if self.game_state_current_game_state != ZumaDeluxeGameState.PLAYING and ZumaDeluxeGameState.DANGER != self.game_state_current_game_state:
-                    self.reset_level()
-                    return
-                self.checked_clear = False
-
+                if self.game_state_current_game_state == ZumaDeluxeGameState.CLEAR_MENU and self.ready_level:
+                    self.moved_up = True
+                    self.ready_level = False
 
                 base_level = self.game_state_current_level
                 if base_level is None:
@@ -367,7 +419,7 @@ class GameController:
                 self.game_actual_area = self.game_actual_section.value.split("- ")[1]
                 self.game_actual_sub_level = self.game_actual_area + " - " +list(ZumaDeluxeBoards)[board_number].value.split("- ")[1]
                 self.game_state_last_level = self.game_state_current_level
-            else:
+            elif self.game_state_current_game_mode == ZumaDeluxeMode.GAUNTLET:
 
                 self.game_actual_section = list(ZumaDeluxeBoards)[self.last_game_state_gauntlet_board]
 
@@ -610,7 +662,7 @@ class GameController:
     def have_chains(self)->bool:
         return self.have_item_su_type("Chains")
 
-    speed_multiplier: float = 1
+
 
 
     def death_linker(self,delta: float):
@@ -621,11 +673,15 @@ class GameController:
             return
         if SectionState.Unlocked not in self.check_difficulty_state() and SectionState.GoalUnlocked not in self.check_difficulty_state():
             return
-        if not self.deathlink:
+        if not self.deathlink_active:
             return
         if self.speed_multiplier > 1:
-            self.speed_multiplier += delta
-            self.death_has_come = True
+            if self.moved_up:
+                self.speed_multiplier = 1
+                self.death_has_come = True
+            else:
+                self.speed_multiplier += delta
+                self.death_has_come = True
         else:
             if not self.death_has_come:
 
@@ -635,8 +691,8 @@ class GameController:
             else:
                 if self.game_state_current_game_state == ZumaDeluxeGameState.PLAYING:
                     self.death_has_come = False
-        if self.game_state_current_game_state == ZumaDeluxeGameState.GAME_OVER or self.lost_a_life:
-            self.reset_level()
+        #if self.game_state_current_game_state == ZumaDeluxeGameState.GAME_OVER or self.lost_a_life:
+         #   self.reset_level()
 
 
 
@@ -678,15 +734,15 @@ class GameController:
         # if self.game_curren
         #
 
-        if self.game_area_coins >= self.coins:
+        if self.game_area_coins >= self.required_coins:
             self.send_location(self.game_actual_area + " (Coins)")
-        if self.game_area_gaps >= self.gaps:
+        if self.game_area_gaps >= self.required_gaps:
             self.send_location(self.game_actual_area + " (Gaps)")
-        if self.game_area_total_combo >= self.combo:
+        if self.game_area_total_combo >= self.required_combo:
             self.send_location(self.game_actual_area + " (Combos)")
-        if self.game_area_max_combo+1 >= self.max_combo:
+        if self.game_area_max_combo+1 >= self.required_max_combo:
             self.send_location(self.game_actual_area + " (Combo Max)")
-        if self.game_area_chains >= self.chain:
+        if self.game_area_chains >= self.required_chain:
             self.send_location(self.game_actual_area + " (Chains)")
         if (self.game_state_current_game_state == ZumaDeluxeGameState.CLEAR_MENU
                 and not self.checked_clear):
@@ -860,7 +916,7 @@ class GameController:
         for item in to_remove:
             self.filler_items_times.pop(item)
 
-    ready_level = False
+
     def harder_goal(self):
 
 
@@ -1028,20 +1084,7 @@ class GameController:
 
         return self.check_item("Progressive Life")+1
 
-    def reset_level(self):
-        self.game_last_balls = 0
-        self.game_last_coins = 0
-        self.game_last_actual_combo = 0
-        self.game_last_total_combo = 0
-        self.game_last_chains = 0
-        self.game_missing_score = 0
-        self.game_state_last_level = self.game_state_current_level
-        self.game_last_score = self.game_score
-        self.ready_level = False
-        self.speed_multiplier = 1
-
-
-    def reset_area(self):
+    def start_area(self):
         self.game_area_coins = 0
         self.game_area_total_combo = 0
         self.game_area_chains = 0
@@ -1053,6 +1096,60 @@ class GameController:
         self.last_life = -1
         self.lost_a_life = False
         self.speed_multiplier = 1
+
+    def restart_by_menu(self):
+        self.game_coins = -1
+        self.game_state_current_level = None
+        self.game_state_current_gauntlet_level = None
+        self.game_state_got_ace_time = False
+        self.last_game_state_gauntlet_board = -1
+        self.game_difficulty: ZumaDeluxeGauntletDifficulties = ZumaDeluxeGauntletDifficulties.RABBIT
+        self.game_last_difficulty: ZumaDeluxeGauntletDifficulties = self.game_difficulty
+
+        # Game Front data
+
+        self.game_state_current_game_mode = None
+        self.game_actual_section = None
+        self.game_last_section = None
+        self.moved_up = False
+        self.game_state_last_level = None
+        self.level_speed = 0.0
+
+        self.checked_clear = False
+        self.check_goal_level_clear = -1
+
+        # # Generation Data
+
+        self.death_has_come = False
+        self.send_death = False
+        self.last_life = -1
+        self.lost_a_life = False
+        self.game_score = -1
+        self.game_balls = -1
+        self.game_coins = -1
+        self.game_gaps = -1
+        self.game_total_combo = -1
+        self.game_chains = -1
+        self.last_death_message = ""
+
+        self.game_missing_score = -1
+        self.game_last_score = -1
+        self.game_base_score = -1
+        self.game_last_balls = -1
+        self.game_last_coins = -1
+        self.game_last_gaps = -1
+        self.game_last_actual_combo = -1
+        self.game_last_total_combo = -1
+        self.game_last_chains = -1
+
+        self.game_area_coins = -1
+        self.game_area_total_combo = -1
+        self.game_area_chains = -1
+        self.game_area_gaps = -1
+        self.game_area_max_combo = -1
+        self.speed_multiplier: float = 1
+        self.ready_level = False
+        self.goal_levels = -1
 
     def get_level_base_speed(self)-> float:
         base_speed: float = 0.5
@@ -1108,6 +1205,105 @@ class GameController:
 
         return f"{temple}-{sub_level}"
 
+    def reset(self) -> None:
+        self.received_items = dict()
+        self.completed_locations = set()
 
+        self.completed_locations_queue = collections.deque()
+        self.received_items_queue = collections.deque()
 
+        self.goal_completed = False
+
+        self.game_state_in_level = None
+        self.game_state_current_game_state = None
+        self.game_state_current_level = None
+        self.game_state_current_gauntlet_level = None
+        self.game_state_gauntlet_board = None
+        self.game_state_got_ace_time = False
+
+        self.last_game_state_gauntlet_board = 0
+        self.game_difficulty: ZumaDeluxeGauntletDifficulties = ZumaDeluxeGauntletDifficulties.RABBIT
+        self.game_last_difficulty: ZumaDeluxeGauntletDifficulties = self.game_difficulty
+
+        # Game Front data
+
+        self.game_state_current_game_mode = None
+        self.game_actual_section = None
+        self.game_last_section = None
+        self.game_action_list = collections.deque()
+        self.moved_up = False
+        self.game_state_last_level = None
+        self.level_speed = 0.0
+
+        # Generation Options
+        self.selected_goal = None
+        self.selected_goal_mode = None
+        self.selected_mode = None
+        self.sun_idols_required = None
+        self.sun_idols_helpers = None
+        self.sun_idols_total = None
+
+        self.include_ace_time = None
+        self.required_coins = None
+        self.required_gaps = None
+        self.required_combo = None
+        self.required_max_combo = None
+        self.required_chain = None
+
+        self.target_ratios = None
+
+        self.gauntlet_selection = None
+        self.gauntlet_amount = None
+        self.selected_gauntlet_difficulty = None
+
+        self.adventure_selection = None
+        self.adventure_amount = None
+        self.maximum_lives = None
+        self.deathlink_option = None
+        self.deathlink_active = False
+        self.checked_clear = False
+        self.check_goal_level_clear = -1
+
+        # # Generation Data
+
+        self.selected_adventure_levels = None
+        self.selected_starter_adventure = None
+        self.selected_goal_level_adventure = None
+
+        self.selected_gauntlet_levels = None
+        self.selected_starter_gauntlet = None
+
+        self.selected_goal_level_gauntlet = None
+
+        self.filler_items_times = {}
+
+        self.death_has_come = False
+        self.send_death = False
+        self.last_life = -1
+        self.lost_a_life = False
+
+        self.game_score = -1
+        self.game_balls = -1
+        self.game_coins = -1
+        self.game_gaps = -1
+
+        self.game_total_combo = -1
+        self.game_chains = -1
+        self.last_death_message = ""
+
+        self.game_missing_score = -1
+        self.game_last_score = -1
+        self.game_base_score = -1
+        self.game_last_balls = -1
+        self.game_last_coins = -1
+        self.game_last_gaps = -1
+        self.game_last_actual_combo = -1
+        self.game_last_total_combo = -1
+        self.game_last_chains = -1
+
+        self.game_area_coins = -1
+        self.game_area_total_combo = -1
+        self.game_area_chains = -1
+        self.game_area_gaps = -1
+        self.game_area_max_combo = -1
 

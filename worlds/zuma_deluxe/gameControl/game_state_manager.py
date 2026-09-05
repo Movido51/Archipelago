@@ -19,16 +19,17 @@ class GameState(NamedTuple):
     current_level: Optional[int] = None
     gauntlet_level: Optional[int] = None
     gauntlet_board: Optional[int] = None
-    destroyed_balls: int = 0
-    combos_total: int = 0
-    actual_score: int = 0
-    base_score: int = 0
-    max_combo: int = 0
-    chains: int = 0
-    gaps: int = 0
-    coins: int = 0
-    level_speed: float = 0
-    actual_time: int = 0
+    destroyed_balls: int = -1
+    combos_total: int = -1
+    actual_score: int = -1
+    base_score: int = -1
+    target_score: int = -1
+    max_combo: int = -1
+    chains: int = -1
+    gaps: int = -1
+    coins: int = -1
+    level_speed: float = -1
+    actual_time: int = -1
     ace_time_bool: bool = False
     actual_life: int = -1
 
@@ -568,6 +569,7 @@ class GameStateManager:
             chains= self.get_made_chains(),
             actual_score = self.get_actual_score(),
             base_score = self.get_base_score(),
+            target_score = self.get_target_score(),
             max_combo=self.get_max_combo(),
             level_speed=self.get_level_speed(),
             ace_time_bool=self.got_ace_time(),

@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from Options import OptionError
-from typing import Optional, List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING
 from .gameControl.enums import (
     ZumaDeluxeBoards,
     ZumaDeluxeAPGoals,
@@ -67,7 +67,7 @@ def pre_generate_gauntlet_levels(world: ZumaDeluxe) -> None:
     print(board_pool)
 
 def pre_generate_adventure_levels(world: ZumaDeluxe) -> None:
-    stage_pool: List[ZumaDeluxeBoards] = list()
+    stage_pool: List[ZumaDeluxeStages] = list()
     minimum_stages: int = world.options.gauntlet_amount.range_start
     stage_weights = world.options.adventure_levels.value
     population = list(stage_weights.keys())

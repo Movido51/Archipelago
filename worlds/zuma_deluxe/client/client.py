@@ -26,11 +26,11 @@ class ZumaDeluxeCommandProcessor(CommonClient.ClientCommandProcessor):
         """If your Death Link setting is set to "Toggle", use this command to turn Death Link on and off."""
         if self.ctx.game_controller.deathlink_option is not None:
             if self.ctx.game_controller.deathlink_option  == 1:
-                if self.ctx.game_controller.deathlink:
-                    self.ctx.game_controller.deathlink = False
+                if self.ctx.game_controller.deathlink_active:
+                    self.ctx.game_controller.deathlink_active = False
                     self.output(f"Death Link turned off")
                 else:
-                    self.ctx.game_controller.deathlink = True
+                    self.ctx.game_controller.deathlink_active = True
                     self.output(f"Death Link turned on")
 
 
@@ -50,6 +50,7 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
     client_loop: Optional[asyncio.Task]
 
     game_controller: GameController
+    data_storage_key: Optional[str]
 
     items_ids_to_names = items_ids_to_names
     location_ids_to_names = locations_ids_to_names
@@ -60,7 +61,7 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
 
     seen_item_indices : Set[int] = set()
 
-    data_storage_key: Optional[str]
+
 
     can_display_process_found_message: bool
     can_display_process_not_found_message: bool
@@ -88,31 +89,53 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
         await self.get_username()
         await self.send_connect()
 
+    async def disconnect(self, allow_autoreconnect: bool = False):
+        try:
+            self.game_controller.close_process_handle()
+        except Exception:
+            pass
+
+        self.game_controller.reset()
+
+        self.data_storage_key = None
+
+        self.items_received = list()
+        self.locations_info = dict()
+
+        self.seen_item_indices = set()
+
+        self.can_display_process_found_message = True
+        self.can_display_process_not_found_message = True
+
+        self.ui.update_tabs()
+
+        await super().disconnect(allow_autoreconnect)
+
     def on_package(self, cmd: str, _args: Any) -> None:
         if cmd == "Connected":
             self.game = self.slot_info[self.slot].game
 
             # generated
 
-            self.game_controller.mode = ZumaDeluxeMode(_args["slot_data"]["game_mode"])
-            self.game_controller.goal = ZumaDeluxeAPGoals(_args["slot_data"]["goal"])
-            self.game_controller.goal_mode = ZumaDeluxeMode(_args["slot_data"]["goal_mode"])
+            self.game_controller.selected_mode = ZumaDeluxeMode(_args["slot_data"]["game_mode"])
+            self.game_controller.selected_goal = ZumaDeluxeAPGoals(_args["slot_data"]["goal"])
+            self.game_controller.selected_goal_mode = ZumaDeluxeMode(_args["slot_data"]["goal_mode"])
 
             self.game_controller.sun_idols_required = _args["slot_data"]["sun_idols_required_amount"]
             self.game_controller.sun_idols_helpers= _args["slot_data"]["sun_idols_helpers_amount"]
             self.game_controller.sun_idols_total = _args["slot_data"]["sun_idol"]
 
             self.game_controller.include_ace_time = bool(_args["slot_data"]["ace_time"])
-            self.game_controller.coins = _args["slot_data"]["coins"]
-            self.game_controller.gaps = _args["slot_data"]["gaps"]
-            self.game_controller.combo = _args["slot_data"]["combo"]
-            self.game_controller.max_combo = _args["slot_data"]["max_combo"]
-            self.game_controller.chain = _args["slot_data"]["chain"]
+            self.game_controller.required_coins = _args["slot_data"]["coins"]
+            self.game_controller.required_gaps = _args["slot_data"]["gaps"]
+            self.game_controller.required_combo = _args["slot_data"]["combo"]
+            self.game_controller.required_max_combo = _args["slot_data"]["max_combo"]
+            self.game_controller.required_chain = _args["slot_data"]["chain"]
 
             amount_levels = 7
-            self.game_controller.coins = math.ceil(amount_levels * self.game_controller.coins / 100.0)
-            self.game_controller.gaps = math.ceil(amount_levels * self.game_controller.gaps / 100.0)
-            self.game_controller.combo = math.ceil(amount_levels * self.game_controller.combo / 100.0)
+            self.game_controller.required_coins = math.ceil(amount_levels * self.game_controller.required_coins / 100.0)
+            self.game_controller.required_gaps = math.ceil(amount_levels * self.game_controller.required_gaps / 100.0)
+            self.game_controller.required_combo = math.ceil(amount_levels * self.game_controller.required_combo / 100.0)
 
 
 
@@ -123,12 +146,12 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
             self.game_controller.selected_gauntlet_difficulty = _args["slot_data"]["gauntlet_difficulty"]
 
             self.game_controller.deathlink_option = _args["slot_data"]["death_link"]
-            self.game_controller.deathlink = self.game_controller.deathlink_option != 0
+            self.game_controller.deathlink_active = self.game_controller.deathlink_option != 0
 
 
 
             # # Generation Data
-            if self.game_controller.mode != ZumaDeluxeMode.ADVENTURE:
+            if self.game_controller.selected_mode != ZumaDeluxeMode.ADVENTURE:
                 self.game_controller.selected_gauntlet_levels = [
                     ZumaDeluxeBoards(board_name) for board_name in _args["slot_data"]["gauntlet_selected_levels"]
                 ]
@@ -158,7 +181,7 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
 
 
 
-            if self.game_controller.mode != ZumaDeluxeMode.GAUNTLET:
+            if self.game_controller.selected_mode != ZumaDeluxeMode.GAUNTLET:
                 self.game_controller.selected_adventure_levels = [
                     ZumaDeluxeStages(stage_name) for stage_name in _args["slot_data"]["adventure_selected_levels"]
                 ]
@@ -200,7 +223,7 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
     def on_deathlink(self, data: Dict[str, Any]) -> None:
         super().on_deathlink(data)
         print("received deathlink")
-        if self.game_controller.deathlink:
+        if self.game_controller.deathlink_active:
             print("absorbed deathlink deathlink")
             message = data["cause"]
             if message == "":
@@ -218,8 +241,8 @@ class ZumaDeluxeContext(CommonClient.CommonContext):
             dt = now - last_time
             last_time = now
 
-            if  self.game_controller.deathlink != ("DeathLink" in self.tags):
-                await self.update_death_link(self.game_controller.deathlink)
+            if  self.game_controller.deathlink_active != ("DeathLink" in self.tags):
+                await self.update_death_link(self.game_controller.deathlink_active)
 
 
             # Enqueue Received Item Delta
