@@ -149,10 +149,13 @@ def generate_items_adventure(world: ZumaDeluxe) -> List[ZumaDeluxeItem]:
             else:
                 adventure_items.append(item)
 
+
     if world.selected_goal_level_adventure is not None:
-        for board_item in sub_item_data:
-            item: ZumaDeluxeItem = create_item_by_sub_name(world, board_item, world.selected_goal_level_adventure.value)
-            if "Unlock" in board_item["name"]:
+        goal_level = world.selected_goal_level_adventure
+        for stage_item in sub_item_data:
+            if "Unlock" in stage_item["name"]:
+                item: ZumaDeluxeItem = create_item_by_sub_name(world, stage_item,
+                                                               world.selected_goal_level_adventure.value)
                 adventure_items.append(item)
 
 
