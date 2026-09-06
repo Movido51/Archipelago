@@ -413,7 +413,10 @@ class GameController:
 
                 board_number = (stage_number%3) * 7 + level_number - 1
 
+
                 self.game_actual_section = list(ZumaDeluxeStages)[stage_number]
+                if self.game_actual_section == ZumaDeluxeStages.SSoZ_13:
+                    board_number = 21 # space board
 
                 self.game_actual_level = " Lvl "+ (stage_number+1).__str__() +"-"+level_number.__str__() + " " + list(ZumaDeluxeBoards)[board_number].value.split("- ")[1]
                 self.game_actual_area = self.game_actual_section.value.split("- ")[1]
