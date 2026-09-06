@@ -364,6 +364,8 @@ class GameController:
                 board_number = (stage_number%3) * 7 + level_number - 1
 
                 self.game_actual_section = list(ZumaDeluxeStages)[stage_number]
+                if self.game_actual_section == ZumaDeluxeStages.SSoZ_13:
+                    board_number = 21 # space board
 
                 self.game_actual_level = " Lvl "+ (stage_number+1).__str__() +"-"+level_number.__str__() + " " + list(ZumaDeluxeBoards)[board_number].value.split("- ")[1]
                 self.game_actual_area = self.game_actual_section.value.split("- ")[1]
@@ -931,6 +933,8 @@ class GameController:
             if self.check_goal_level_clear >= level_target:
                 if self.goal_levels >= suns:
                     self.goal_completed = True
+                    goal_clear: str = self.game_up_area + " (Goal)"
+                    self.send_location(goal_clear)
                     #print("done")
                     return
                 #print("not amount of levels")
@@ -946,7 +950,9 @@ class GameController:
                 return
             dif_lev: int = self.game_state_current_level
             #print(f"level {dif_lev}")
-            if dif_lev < 15:
+            if dif_lev == 75:
+                total_lev = 1
+            elif dif_lev < 15:
                 total_lev = 5
             elif dif_lev < 33:
                 total_lev = 6
@@ -957,6 +963,11 @@ class GameController:
             #print(self.goal_levels)
             if self.goal_levels >= total_lev:
                 self.goal_completed = True
+                goal_clear: str = self.game_actual_area + " (Goal)"
+                #if dif_lev == 75:
+                 #   goal_clear = "Space (Goal)"
+                self.logger.info(goal_clear)
+                self.send_location(goal_clear)
                 #print("done")
                 return
             #print("not amount of levels")
