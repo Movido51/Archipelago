@@ -443,7 +443,7 @@ class GameStateManager:
         except Exception:
             print("failed to add lives")
             return False
-    def change_random_color(self)->bool:
+    def change_random_color(self, maxcolor: int = 4)->bool:
         if self.ready_ball_color_address is None:
             return False
         if self.reserve_ball_color_address is None:
@@ -454,7 +454,9 @@ class GameStateManager:
             change_ready: int = random.randint(0, 5)
             change_reserved: int = random.randint(0, 5)
             ready_color += change_ready
+            ready_color = ready_color % maxcolor
             reserved_color += change_reserved
+            reserved_color = reserved_color % maxcolor
             self.process.write_int(self.ready_ball_color_address, ready_color)
             self.process.write_int(self.reserve_ball_color_address, reserved_color)
 

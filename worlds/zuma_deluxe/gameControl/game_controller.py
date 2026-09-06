@@ -5,8 +5,6 @@ import logging
 
 import enum
 
-from Cython.Compiler.Errors import reset
-
 from .enums import (
     ZumaDeluxeGameState,
     ZumaDeluxeInLevel,
@@ -500,7 +498,7 @@ class GameController:
                 count_chains = self.game_chains - 4
             else:
                 count_chains = dif_chains
-                base_chains =self.game_last_chains
+                base_chains =self.game_last_chains - 4
             score_chains: int = count_chains * 100
             for i in range(count_chains):
                 score_chains += 10*i+base_chains*10
@@ -654,7 +652,7 @@ class GameController:
         if self.game_state_current_level is None:
             return
 
-        if self.moved_up and SectionState.Unlocked in self.check_state():
+        if self.moved_up and SectionState.Unlocked in self.check_state() and self.game_state_current_game_mode == ZumaDeluxeMode.GAUNTLET:
             the_last_was_true = (self.game_state_current_level-1) // 7 <= self.check_item("Progressive Difficulty")
             print("unlocked difficulty?")
             if the_last_was_true:
@@ -703,6 +701,8 @@ class GameController:
                 area_clear = (lev - 14) % 6 == 0
             else:
                 area_clear = (lev - 32) % 7 == 0
+            if ZumaDeluxeMode.GAUNTLET == self.game_state_current_game_mode:
+                area_clear = False
             if area_clear:
                 full_clear: str = self.game_actual_area + " (Full Clear)"
                 self.send_location(full_clear)
@@ -798,6 +798,9 @@ class GameController:
         if self.game_actual_section is None:
             return
 
+        if self.base_level_speed == 0:
+            self.base_level_speed = 0.70
+
         useful =  10
         traps = 1
         filler = 1
@@ -836,12 +839,22 @@ class GameController:
                         self.game_state_manager.add_to_score(-dif_score)
                         self.game_last_score -= dif_score
                     case "Color Shift Trap":
-                        self.game_state_manager.change_random_color()
+                        maxcolor: int = 4
+                        if self.game_state_current_game_mode == ZumaDeluxeMode.GAUNTLET:
+                            maxcolor = min(self.game_state_current_level // 7 + 4, 6)
+                        else:
+                            if self.game_state_current_level < 15:
+                                maxcolor = 4
+                            elif self.game_state_current_level < 33:
+                                maxcolor = 5
+                            else:
+                                maxcolor = 6
+                        self.game_state_manager.change_random_color(maxcolor)
                     case "Rush Trap":
                         if act < 0:
                             self.game_state_manager.set_level_speed(self.base_level_speed)
                         else:
-                            self.game_state_manager.set_level_speed(self.level_speed*2)
+                            self.game_state_manager.set_level_speed(self.level_speed+0.5)
                     case "Get a Break":
                         if act < 0:
                             self.game_state_manager.set_level_speed(self.base_level_speed)
