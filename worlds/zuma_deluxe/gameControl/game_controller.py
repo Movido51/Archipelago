@@ -323,8 +323,6 @@ class GameController:
         if not self.game_state_manager.are_all_temples_unlocked():
             self.game_state_manager.unlock_all_temples()
 
-
-
     def back_setup(self)->None:
 
         if self.game_state_in_level == ZumaDeluxeInLevel.LEVEL:
@@ -654,14 +652,14 @@ class GameController:
         if self.game_state_current_level is None:
             return
 
-        if self.moved_up and SectionState.Unlocked in self.check_state() and self.game_state_current_game_mode == ZumaDeluxeMode.GAUNTLET:
+        if self.moved_up and ( SectionState.Unlocked in self.check_state() or SectionState.GoalUnlocked in self.check_state())and self.game_state_current_game_mode == ZumaDeluxeMode.GAUNTLET :
             the_last_was_true = (self.game_state_current_level-1) // 7 <= self.check_item("Progressive Difficulty")
             print("unlocked difficulty?")
             if the_last_was_true:
                 print("unlocked difficulty")
                 if self.game_state_current_game_mode == ZumaDeluxeMode.GAUNTLET:
                     clear: str = self.game_up_level + " (Level Clear)"
-                    print(clear)
+
 
                     self.send_location(clear)
                     if self.game_up_area != self.game_actual_area:
@@ -914,6 +912,7 @@ class GameController:
         if self.game_actual_section is None:
             self.goal_levels = 0
             return
+
         if self.check_goal_level_clear == -1:
             return
         #print("tried goal")
@@ -927,8 +926,6 @@ class GameController:
             level_target: int = 0
             dif_lev: int = self.selected_gauntlet_difficulty
             level_target = dif_lev * 7
-            #print(f"target dificulty {level_target}")
-            #print(f"level{self.check_goal_level_clear}")
             suns = self.sun_idols_helpers - self.check_sun_idols()
             if self.check_goal_level_clear >= level_target:
                 if self.goal_levels >= suns:
@@ -966,7 +963,6 @@ class GameController:
                 goal_clear: str = self.game_actual_area + " (Goal)"
                 #if dif_lev == 75:
                  #   goal_clear = "Space (Goal)"
-                self.logger.info(goal_clear)
                 self.send_location(goal_clear)
                 #print("done")
                 return
