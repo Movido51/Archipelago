@@ -544,8 +544,58 @@ class ZumaDeluxeLevelInfoLayout(BoxLayout):
         self.layout_actual_map.color = color
         self.layout_actual_map.text = text_map
 
+class GauntletDifLayout(BoxLayout):
+    ctx: ZumaDeluxeContext
+    list_dif: List[Label]
+
+    def __init__(self, ctx: ZumaDeluxeContext) -> None:
+        super().__init__(
+            orientation="horizontal",
+            size_hint_y=None
+        )
+        self.ctx = ctx
+        sel_dif =self.ctx.game_controller.selected_gauntlet_difficulty + 1
+        self.list_dif = []
+        if sel_dif is None :
+            return
+
+        for i in range(sel_dif):
+            message = f" {list(ZumaDeluxeGauntletDifficulties)[i].name}"
+            label_board = Label(
+                text=message,
+                halign="center",
+                size_hint_y=None,
+
+            )
+            unlocked = self.ctx.game_controller.check_item("Progressive Difficulty") >= i
+            if unlocked:
+                color = (0, 1, 0, 1)
+            else:
+                color = (1, 0, 0, 1)
+            label_board.color = color
+            self.list_dif.append(label_board)
+            self.add_widget(label_board)
+
+    def update(self,*_):
+        sel_dif = self.ctx.game_controller.selected_gauntlet_difficulty + 1
+
+        if sel_dif is None:
+            return
+
+        for i in range(sel_dif):
+            unlocked = self.ctx.game_controller.check_item("Progressive Difficulty") >= i
+            if unlocked:
+                color = (0, 1, 0, 1)
+            else:
+                color = (1, 0, 0, 1)
+            self.list_dif[i].color = color
+
+
+
+
 class GauntletLayout(BoxLayout):
     ctx: ZumaDeluxeContext
+    diff_enable: GauntletDifLayout
     list_boards: List[Label]
 
     def __init__(self, ctx: ZumaDeluxeContext) -> None:
@@ -559,6 +609,9 @@ class GauntletLayout(BoxLayout):
         self.bind(
             minimum_height=self.setter("height")
         )
+
+        self.diff_enable = GauntletDifLayout(ctx=ctx)
+        self.add_widget(self.diff_enable)
         boards_state = self.ctx.game_controller.gauntlet_selection
         self.list_boards = []
         for board, state in boards_state.items():
