@@ -995,7 +995,7 @@ class GameController:
 
     def check_difficulty_state(self)->List[SectionState]:
         state:List[SectionState] = self.check_state()
-        if SectionState.Unlocked not in state:
+        if SectionState.Unlocked not in state or SectionState.GoalUnlocked not in state:
             return state
         else:
             if not isinstance(self.game_actual_section, ZumaDeluxeBoards):
