@@ -18,7 +18,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.image import Image
 
 import CommonClient
-from ..gameControl.enums import ZumaDeluxeMode
+from ..gameControl.enums import ZumaDeluxeMode, ZumaDeluxeGauntletDifficulties
 from ..gameControl.game_controller import SectionState
 from .client import ZumaDeluxeContext
 from . import client_gui
